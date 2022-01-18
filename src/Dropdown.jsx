@@ -1,27 +1,16 @@
 import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/solid";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Dropdown() {
+export default function Dropdown({ host, contents }) {
+  console.log(contents.options)
   return (
     <Menu as="div">
       <div>
-        <Menu.Button>
-        <a
-              className="block p-1 rounded-full bg-blue-300 transition hover:scale-110 hover:bg-blue-600"
-              href=""
-            >
-              <img
-                className="w-12 h-12 rounded-full cursor-pointer object-cover"
-                src="https://placekitten.com/200/200"
-                alt=""
-              />
-            </a>
-        </Menu.Button>
+        <Menu.Button>{host}</Menu.Button>
       </div>
 
       <Transition
@@ -33,62 +22,26 @@ export default function Dropdown() {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="origin-top-right absolute right-1 top-16 mt-2 w-36 rounded-md shadow-lg bg-gray-50 ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="origin-top-right absolute right-1 top-16 mt-2 w-52 rounded-md shadow-lg bg-gray-50 dark:bg-slate-900 ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
-            <Menu.Item>
-              {({ active }) => (
-                <a
-                  href="#"
-                  className={classNames(
-                    active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                    "block px-4 py-2 text-sm"
+            {contents.options.map((option, index)=> {
+              return (
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href="#"
+                      className={classNames(
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                        "block px-4 py-2 text-sm text-lg transition hover:underline hover:font-semibold dark:bg-slate-900 dark:text-gray-300 dark:hover:text-gray-50"
+                      )}
+                      key={index}
+                    >
+                      {option}
+                    </a>
                   )}
-                >
-                  Account settings
-                </a>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <a
-                  href="#"
-                  className={classNames(
-                    active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                    "block px-4 py-2 text-sm"
-                  )}
-                >
-                  Support
-                </a>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <a
-                  href="#"
-                  className={classNames(
-                    active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                    "block px-4 py-2 text-sm"
-                  )}
-                >
-                  License
-                </a>
-              )}
-            </Menu.Item>
-            <form method="POST" action="#">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    type="submit"
-                    className={classNames(
-                      active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                      "block w-full text-left px-4 py-2 text-sm"
-                    )}
-                  >
-                    Sign out
-                  </button>
-                )}
-              </Menu.Item>
-            </form>
+                </Menu.Item>
+              );
+            })}
           </div>
         </Menu.Items>
       </Transition>
