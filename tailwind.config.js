@@ -7,6 +7,7 @@ module.exports = {
   },
   plugins: [
     require('@tailwindcss/forms'),
+    require('@tailwindcss/line-clamp')
   ],
-  //darkMode: "class",
+  darkMode: "class",
 }
