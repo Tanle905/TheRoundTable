@@ -2,8 +2,8 @@ function Message() {
   return (
     <section className="min-h-screen bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
       <div className="col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
-        <div className="p-4 py-1 flex border-b-2 border-gray-200">
-          <h1 className="font-bold my-auto text-gray-800 dark:text-gray-50 text-2xl">
+        <div className="p-4 py-1 flex border-b-2 border-gray-200 dark:border-slate-800">
+          <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
             Chats
           </h1>
           <div className="py-3 my-auto ml-auto sm:mr-5 relative group">
@@ -48,16 +48,16 @@ function Message() {
           </button>
         </div>
         <ul className="space-y-3">
-          <li className="hover:bg-gray-200 group transition">
+          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
             <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500"
+                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
                   src="https://placekitten.com/200/200"
                   alt=""
                 />
               </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-50">
+              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
                 <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
                 <p className="truncate">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
@@ -65,21 +65,21 @@ function Message() {
                   Varius quam quisque id diam vel quam elementum.
                 </p>
               </div>
-              <div className="col-span-1 mr-auto dark:text-gray-50 text-gray-700">
+              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
                 <p>25m</p>
               </div>
             </div>
           </li>
-          <li className="hover:bg-gray-200 group transition">
+          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
             <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500"
-                  src="https://placekitten.com/270/203"
+                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
+                  src="https://placekitten.com/200/222"
                   alt=""
                 />
               </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-50">
+              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
                 <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
                 <p className="truncate">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
@@ -87,21 +87,21 @@ function Message() {
                   Varius quam quisque id diam vel quam elementum.
                 </p>
               </div>
-              <div className="col-span-1 mr-auto dark:text-gray-50 text-gray-700">
+              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
                 <p>25m</p>
               </div>
             </div>
           </li>
-          <li className="hover:bg-gray-200 group transition">
+          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
             <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500"
-                  src="https://placekitten.com/200/202"
+                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
+                  src="https://placekitten.com/200/233"
                   alt=""
                 />
               </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-50">
+              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
                 <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
                 <p className="truncate">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
@@ -109,21 +109,21 @@ function Message() {
                   Varius quam quisque id diam vel quam elementum.
                 </p>
               </div>
-              <div className="col-span-1 mr-auto dark:text-gray-50 text-gray-700">
+              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
                 <p>25m</p>
               </div>
             </div>
           </li>
-          <li className="hover:bg-gray-200 group transition">
+          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
             <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500"
-                  src="https://placekitten.com/200/201"
+                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
+                  src="https://placekitten.com/200/244"
                   alt=""
                 />
               </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-50">
+              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
                 <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
                 <p className="truncate">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
@@ -131,24 +131,57 @@ function Message() {
                   Varius quam quisque id diam vel quam elementum.
                 </p>
               </div>
-              <div className="col-span-1 mr-auto dark:text-gray-50 text-gray-700">
+              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
                 <p>25m</p>
               </div>
             </div>
           </li>
         </ul>
       </div>
-      <div className="col-start-5 col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-3">
-        <div className="row-span-2">
-          <div className="bg-gradient-to-r from-blue-100 to-blue-400 font-medium text-3xl text-gray-800">
+      <div className="col-start-5 col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
+        <div className="row-span-5">
+          <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-3xl text-gray-700 dark:text-gray-200">
             <h1 className="p-3 ml-3">Nyannnnnnnnn</h1>
+            <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
+            <a href="" className="">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 transition hover:-translate-y-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+            </a>
+            <a href="">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 transition hover:-translate-y-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+            </a>
+            </div>
           </div>
-          <div></div>
         </div>
-        <div className="mt-auto mb-28 row-start-3 flex justify-center sm:px-3 xl:px-0">
+        <div className="mt-auto mb-28 row-start-6 flex justify-center sm:px-3 xl:px-0">
           <a
             href=""
-            className="text-gray-600 my-auto mr-4 transition hover:rotate-12"
+            className="text-gray-600 dark:text-gray-400 my-auto mr-4 transition hover:rotate-12"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -166,13 +199,13 @@ function Message() {
             </svg>
           </a>
           <input
-            className="w-5/6 rounded-full border-gray-300 focus:ring-0 focus:border-gray-300"
+            className="w-5/6 rounded-full dark:bg-slate-900 border-gray-300 dark:border-indigo-500 dark:text-gray-200 focus:ring-0 focus:border-gray-300"
             type="text"
             placeholder="Type messages here..."
           />
           <a
             href=""
-            className="text-blue-600 my-auto ml-4 rotate-90 transition hover:rotate-0 "
+            className="text-blue-600 dark:text-indigo-500 my-auto ml-4 rotate-90 transition hover:rotate-0 "
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -226,7 +259,7 @@ function Message() {
             </li>
           </ul>
           <a href="" className="text-center">
-            <h1 className="font-semibold text-md text-blue-600 transition hover:underline">
+            <h1 className="font-semibold text-md text-blue-600 dark:text-gray-300 transition hover:underline">
               View shared file...
             </h1>
           </a>
@@ -234,7 +267,7 @@ function Message() {
         <div className="grid grid-cols-2 content-center">
           <a
             href="#"
-            className="col-span-1 py-4 text-center text-blue-600 text-md font-medium border-b-4 border-blue-700 flex group active"
+            className="col-span-1 py-4 text-center text-blue-600 dark:text-indigo-500 text-md font-medium border-b-4 border-blue-700 dark:border-indigo-500 flex group active"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +287,7 @@ function Message() {
           </a>
           <a
             href="#"
-            className="col-span-1 py-4 text-center text-gray-600 text-md font-medium border-b-2 flex group"
+            className="col-span-1 py-4 text-center text-gray-600 dark:text-gray-300 text-md font-medium border-b-2 flex group"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
