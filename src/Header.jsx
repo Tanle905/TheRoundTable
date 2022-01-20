@@ -1,7 +1,12 @@
-import { useState } from "react";
 import Dropdown from "./Dropdown";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import "firebase/compat/auth";
 
 function Header() {
+  const auth = firebase.auth();
+  const user = firebase.auth().currentUser;
+
   return (
     <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
       <div className="grid grid-cols-4 py-2">
@@ -101,7 +106,7 @@ function Header() {
                   >
                     <img
                       className="shrink-0 w-12 h-12 rounded-full cursor-pointer object-cover"
-                      src="https://placekitten.com/200/200"
+                      src={user.photoURL}
                       alt=""
                     />
                   </a>
@@ -157,12 +162,12 @@ function Header() {
                       fill="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M11.02 3.77v1.56l1-.99V2.5l-.5-.5h-9l-.5.5v.486L2 3v10.29l.36.46 5 1.72L8 15v-1h3.52l.5-.5v-1.81l-1-1V13H8V4.71l-.33-.46L4.036 3h6.984v.77zM7 14.28l-4-1.34V3.72l4 1.34v9.22zm6.52-5.8H8.55v-1h4.93l-1.6-1.6.71-.7 2.47 2.46v.71l-2.49 2.48-.7-.7 1.65-1.65z"
                       />
                     </svg>
-                    <p>Sign Out</p>
+                    <p onClick={()=>auth.signOut()}>Sign Out</p>
                   </div>,
                 ],
               }}

@@ -6,7 +6,6 @@ function classNames(...classes) {
 }
 
 export default function Dropdown({ host, contents }) {
-  console.log(contents.options)
   return (
     <Menu as="div">
       <div>
@@ -24,9 +23,9 @@ export default function Dropdown({ host, contents }) {
       >
         <Menu.Items className="origin-top-right absolute right-1 top-16 mt-2 w-52 rounded-md shadow-lg bg-gray-50 dark:bg-slate-900 ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1 z-10">
-            {contents.options.map((option, index)=> {
+            {contents.options.map((option, index) => {
               return (
-                <Menu.Item>
+                <Menu.Item key={index}>
                   {({ active }) => (
                     <a
                       href="#"
@@ -34,7 +33,6 @@ export default function Dropdown({ host, contents }) {
                         active ? "bg-gray-100 text-gray-900" : "text-gray-700",
                         "block px-4 py-2 text-sm text-lg transition hover:underline hover:font-semibold dark:bg-slate-900 text-blue-600 dark:text-gray-300 dark:hover:text-gray-50"
                       )}
-                      key={index}
                     >
                       {option}
                     </a>

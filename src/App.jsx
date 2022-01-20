@@ -1,45 +1,35 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import "./App.css";
+import Header from "./Header";
+import Message from "./Message";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import "firebase/compat/auth";
+import SignIn from "./SignIn";
+import { useAuthState } from "react-firebase-hooks/auth";
+
+firebase.initializeApp({
+  apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
+  authDomain: "the-round-table-ffc3f.firebaseapp.com",
+  projectId: "the-round-table-ffc3f",
+  storageBucket: "the-round-table-ffc3f.appspot.com",
+  messagingSenderId: "551826854387",
+  appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
+  measurementId: "G-3NRE8RWMTD",
+});
 
 function App() {
-  const [count, setCount] = useState(0)
+  const auth = firebase.auth();
+  const firestore = firebase.firestore();
+  const [user] = useAuthState(auth);
 
-  return (
-    <div className="App dark:bg-slate-900">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.jsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
-  )
+  if (user) {
+    return (
+      <div>
+        <Header />
+        <Message />
+      </div>
+    );
+  } else return <SignIn />;
 }
 
-export default App
+export default App;

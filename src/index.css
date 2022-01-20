@@ -14,3 +14,15 @@ code {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .sent{
+    @apply justify-start flex-row-reverse
+  }
+  .received{
+    @apply justify-start
+  }
+  .sent img{
+    @apply ml-2
+  }
+}
