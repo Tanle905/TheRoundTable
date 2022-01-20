@@ -7,9 +7,53 @@ import { useState } from "react";
 function Message() {
   const auth = firebase.auth();
   const user = firebase.auth().currentUser;
+  //WebRTC
+  const servers = {
+    iceservers: [
+      {
+        urls: [
+          "stun.l.google.com:19302",
+          "stun3.l.google.com:19302",
+          "stunserver.org",
+        ],
+      },
+    ],
+    iceCandidatePoolSize: 10,
+  };
+  let pc = new RTCPeerConnection(servers);
+  let localStream = null;
+  let remoteStream = null;
+  const callHandle = async () => {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: true,
+    });
+  };
+  const videoCallHandle = async () => {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    remoteStream = new MediaStream();
+    //Push track from local stram to peer connection
+    localStream.getTracks().forEach((track) => {
+      pc.addTrack(track, localStream);
+    });
+
+    //Pull tracks from remote stream, add to video stream
+    pc.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+      });
+    };
+    ///sdfsdfsdfsdfsdfsdfsdfsdf
+    webcamVideo.srcObject = localStream;
+    remoteVideo.srcObject = remoteStream;
+  };
+
   const messagesRef = firebase.firestore().collection("messages");
-  const query = messagesRef.orderBy("createdAt").limit(25);
-  const [messages] = useCollectionData(query, { idField: 'id' });
+  const query = messagesRef.orderBy("createdAt").limit(50);
+  const [messages] = useCollectionData(query, { idField: "id" });
   function Chat() {
     function ChatMessage(props) {
       const { text, uid, photoURL } = props.message;
@@ -17,7 +61,7 @@ function Message() {
       return (
         <div className={`flex space-x-2 space-y-2 ${messageClass}`}>
           <img
-            className={`mb-1 rounded-full w-6 h-6 mt-auto ${messageClass}`}
+            className={`mb-1 rounded-full w-6 h-6 mt-auto ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
             src={photoURL}
             alt=""
           />
@@ -27,7 +71,7 @@ function Message() {
     }
 
     return (
-      <div>
+      <div className="px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
         {messages &&
           messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
       </div>
@@ -39,18 +83,20 @@ function Message() {
   const sendMessage = async (e) => {
     e.preventDefault();
 
-    const { uid, photoURL } = auth.currentUser;
-    await messagesRef.add({
-      text: formValue,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid,
-      photoURL,
-    });
-    setFormValue('')
+    if (formValue !== "") {
+      const { uid, photoURL } = auth.currentUser;
+      await messagesRef.add({
+        text: formValue,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        uid,
+        photoURL,
+      });
+      setFormValue("");
+    }
   };
   return (
     <section className="min-h-screen bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
-      <div className="col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
+      <div className="max-h-screen hidden sm:block col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
         <div className="p-4 py-1 flex border-b-2 border-gray-200 dark:border-slate-800">
           <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
             Chats
@@ -96,7 +142,7 @@ function Message() {
         </div>
         <ul className="space-y-3">
           <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
                   className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
@@ -118,7 +164,7 @@ function Message() {
             </div>
           </li>
           <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
                   className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
@@ -140,7 +186,7 @@ function Message() {
             </div>
           </li>
           <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
                   className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
@@ -162,7 +208,7 @@ function Message() {
             </div>
           </li>
           <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="flex p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
               <a href="" className="col-span-1">
                 <img
                   className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
@@ -185,12 +231,12 @@ function Message() {
           </li>
         </ul>
       </div>
-      <div className="col-start-5 col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
-        <div className="row-span-1">
+      <div className="max-h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
+        <div className="row-span-5 ">
           <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-3xl text-gray-700 dark:text-gray-200">
             <h1 className="p-3 ml-3">Nyannnnnnnnn</h1>
             <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
-              <a href="" className="">
+              <button onClick={callHandle}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -205,8 +251,10 @@ function Message() {
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   />
                 </svg>
-              </a>
-              <a href="">
+              </button>
+              <button onClick={
+                videoCallHandle
+              }>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -221,14 +269,15 @@ function Message() {
                     d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                   />
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
+          <div className="h-5/6 space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+            <Chat />
+          </div>
         </div>
-        <div className="row-span-4 px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
-          <Chat />
-        </div>
-        <div className="mt-auto mb-28 row-start-6">
+
+        <div className="mb-auto row-start-6">
           <form
             onSubmit={sendMessage}
             className="flex justify-center sm:px-3 xl:px-0"
@@ -276,8 +325,8 @@ function Message() {
           </form>
         </div>
       </div>
-      <div className="sm:col-start-10 xl:col-start-11 sm:col-span-3 xl:col-span-2 shadow-md shadow-gray-500 dark:shadow-slate-800">
-        <div className="m-3">
+      <div className="max-h-screen hidden sm:block sm:col-start-10 xl:col-start-11 sm:col-span-3 xl:col-span-2 shadow-md shadow-gray-500 dark:shadow-slate-800">
+        <div className="mx-3">
           <ul className="flex space-x-2 justify-center">
             <li>
               <a href="">

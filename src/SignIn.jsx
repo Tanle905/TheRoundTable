@@ -11,9 +11,9 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center dark:bg-slate-900">
+    <div className="min-h-screen grid place-items-center bg-gray-100 dark:bg-slate-900">
       <button
-        className="px-2 py-3 dark:bg-indigo-700 text-2xl text-center font-medium text-gray-200 hover:text-gray-50 transition rounded-lg"
+        className="px-2 py-3 text-gray-100 bg-blue-600 dark:bg-indigo-700 text-2xl text-center font-medium text-gray-200 hover:text-gray-50 hover:bg-blue-500 dark:hover:bg-indigo-600 hover:-translate-y-1 transition rounded-lg"
         onClick={signInWithGoggle}
       >
         Sign in with Google

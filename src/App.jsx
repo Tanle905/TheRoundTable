@@ -24,7 +24,7 @@ function App() {
 
   if (user) {
     return (
-      <div>
+      <div className="">
         <Header />
         <Message />
       </div>

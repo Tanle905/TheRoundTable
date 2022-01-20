@@ -23,6 +23,6 @@ code {
     @apply justify-start
   }
   .sent img{
-    @apply ml-2
+    @apply ml-2 mr-0
   }
 }
