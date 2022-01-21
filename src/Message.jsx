@@ -39,7 +39,7 @@ function Message() {
           ) : (
             ""
           )}
-          <img src={image} className="max-h-48 sm:max-h-96" alt="" />
+          <img src={image} className="max-h-40 sm:max-h-96" alt="" />
         </div>
       );
     }
@@ -65,10 +65,12 @@ function Message() {
     }
   };
 
-  const fileHandle = (event) => {
+  const fileHandle = async (event) => {
+    event.preventDefault();
     const file = event.target.files[0];
     const fileImagesRef = ref(storage, "images/" + file.name);
-    uploadBytes(fileImagesRef, file).then((snapshot) => {
+    await uploadBytes(fileImagesRef, file).then((snapshot) => {
+      console.log('sending')
     });
     getDownloadURL(fileImagesRef).then(async (url) => {
       const { uid, photoURL } = auth.currentUser;
@@ -267,10 +269,11 @@ function Message() {
             onSubmit={sendMessage}
             className="flex justify-center sm:px-3 xl:px-0"
           >
+            <input type="file" className="hidden" id="selectedFile" onChange={fileHandle} />
             <label
               className="text-gray-600 dark:text-gray-400 my-auto mr-4 transition hover:rotate-12 cursor-pointer"
+              htmlFor="selectedFile"
             >
-              <input type="file" className="hidden" onChange={fileHandle} />
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-7 w-7"
