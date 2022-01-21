@@ -2,11 +2,12 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function Message() {
   const auth = firebase.auth();
   const user = firebase.auth().currentUser;
+
   //WebRTC
   const servers = {
     iceservers: [
@@ -21,20 +22,19 @@ function Message() {
     iceCandidatePoolSize: 10,
   };
   let pc = new RTCPeerConnection(servers);
-  let localStream = null;
-  let remoteStream = null;
-  const callHandle = async () => {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: false,
-      audio: true,
-    });
-  };
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
+
+  const localStreamRef = useRef(null)
+
   const videoCallHandle = async () => {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    remoteStream = new MediaStream();
+    setLocalStream(
+      await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      })
+    );
+    setRemoteStream(new MediaStream());
     //Push track from local stram to peer connection
     localStream.getTracks().forEach((track) => {
       pc.addTrack(track, localStream);
@@ -46,10 +46,88 @@ function Message() {
         remoteStream.addTrack(track);
       });
     };
-    ///sdfsdfsdfsdfsdfsdfsdfsdf
-    webcamVideo.srcObject = localStream;
+    localStreamRef = localStream;
     remoteVideo.srcObject = remoteStream;
   };
+  //2. Create an offer
+  const startCalling = async () => {
+    //Reference firestore collection
+    const callDoc = firebase.firestore().collection("calls").doc();
+    const offerCandidates = callDoc.collection("offerCandidates");
+    const answerCandidates = callDoc.collection("answerCandidates");
+
+    var callInput = callDoc.id;
+
+    //Get candidates for caller, save to db
+    pc.onicecandidate = (event) => {
+      event.candidate && offerCandidates.add(event.candidate.toJSON());
+    };
+
+    const offerDescription = await pc.createOffer();
+    await pc.setLocalDescription(offerDescription);
+
+    const offer = {
+      sdp: offerDescription.sdp,
+      type: offerDescription.type,
+    };
+
+    await callDoc.set({ offer });
+
+    //Listen for remote answer
+    callDoc.onSnapshot((snapshot) => {
+      const data = snapshot.data();
+      if (!pc.currentRemoteDescription && data?.answer) {
+        const answerDescription = new RTCSessionDescription(data.answer);
+        pc.setRemoteDescription(answerDescription);
+      }
+
+      //When answered, add candidate to peer connection
+      answerCandidates.onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            const candidate = new RTCIceCandidate(change.doc.data());
+            pc.addIceCandidate(candidate);
+          }
+        });
+      });
+    });
+    console.log("working");
+  };
+
+  //3. Answer the call with unique ID
+  const answerHandle = async () => {
+    const callId = callInput;
+    const callDoc = firebase.firestore().collection("calls").doc(callId);
+    const answerCandidates = callDoc.collection("answerCandidates");
+
+    pc.onicecandidate = (event) => {
+      event.candidate && answerCandidates.add(event.candidate.toJSON());
+    };
+
+    const callData = (await callDoc.get()).data();
+
+    const offerDescription = callData.offer;
+    await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+
+    const answerDescription = await pc.createAnswer();
+    await pc.setLocalDescription(answerDescription);
+
+    const answer = {
+      type: answerDescription.type,
+      sdp: answerDescription.sdp,
+    };
+
+    await callDoc.update({ answer });
+
+    offerCandidates.onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        console.log(change);
+        let data = change.doc.data();
+        pc.addIceCandidate(new RTCIceCandidate(data));
+      });
+    });
+  };
+  //END OF WebRTC
 
   const messagesRef = firebase.firestore().collection("messages");
   const query = messagesRef.orderBy("createdAt").limit(50);
@@ -236,7 +314,7 @@ function Message() {
           <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-3xl text-gray-700 dark:text-gray-200">
             <h1 className="p-3 ml-3">Nyannnnnnnnn</h1>
             <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
-              <button onClick={callHandle}>
+              <button onClick={startCalling}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -252,9 +330,7 @@ function Message() {
                   />
                 </svg>
               </button>
-              <button onClick={
-                videoCallHandle
-              }>
+              <button onClick={videoCallHandle}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -273,6 +349,7 @@ function Message() {
             </div>
           </div>
           <div className="h-5/6 space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+            <video ref={localStreamRef} className="h-2/6"></video>
             <Chat />
           </div>
         </div>
