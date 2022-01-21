@@ -25,7 +25,7 @@ function Message() {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
 
-  const localStreamRef = useRef(null)
+  let localStreamRef = useRef(null)
 
   const videoCallHandle = async () => {
     setLocalStream(
