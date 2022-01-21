@@ -1,140 +1,31 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useRef, useState } from "react";
 
 function Message() {
+  const firebaseApp = firebase.initializeApp({
+    apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
+    authDomain: "the-round-table-ffc3f.firebaseapp.com",
+    projectId: "the-round-table-ffc3f",
+    storageBucket: "the-round-table-ffc3f.appspot.com",
+    messagingSenderId: "551826854387",
+    appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
+    measurementId: "G-3NRE8RWMTD",
+  });
   const auth = firebase.auth();
-  const user = firebase.auth().currentUser;
-
-  //WebRTC
-  const servers = {
-    iceservers: [
-      {
-        urls: [
-          "stun.l.google.com:19302",
-          "stun3.l.google.com:19302",
-          "stunserver.org",
-        ],
-      },
-    ],
-    iceCandidatePoolSize: 10,
-  };
-  let pc = new RTCPeerConnection(servers);
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
-
-  let localStreamRef = useRef(null)
-
-  const videoCallHandle = async () => {
-    setLocalStream(
-      await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      })
-    );
-    setRemoteStream(new MediaStream());
-    //Push track from local stram to peer connection
-    localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream);
-    });
-
-    //Pull tracks from remote stream, add to video stream
-    pc.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
-      });
-    };
-    localStreamRef = localStream;
-    remoteVideo.srcObject = remoteStream;
-  };
-  //2. Create an offer
-  const startCalling = async () => {
-    //Reference firestore collection
-    const callDoc = firebase.firestore().collection("calls").doc();
-    const offerCandidates = callDoc.collection("offerCandidates");
-    const answerCandidates = callDoc.collection("answerCandidates");
-
-    var callInput = callDoc.id;
-
-    //Get candidates for caller, save to db
-    pc.onicecandidate = (event) => {
-      event.candidate && offerCandidates.add(event.candidate.toJSON());
-    };
-
-    const offerDescription = await pc.createOffer();
-    await pc.setLocalDescription(offerDescription);
-
-    const offer = {
-      sdp: offerDescription.sdp,
-      type: offerDescription.type,
-    };
-
-    await callDoc.set({ offer });
-
-    //Listen for remote answer
-    callDoc.onSnapshot((snapshot) => {
-      const data = snapshot.data();
-      if (!pc.currentRemoteDescription && data?.answer) {
-        const answerDescription = new RTCSessionDescription(data.answer);
-        pc.setRemoteDescription(answerDescription);
-      }
-
-      //When answered, add candidate to peer connection
-      answerCandidates.onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            const candidate = new RTCIceCandidate(change.doc.data());
-            pc.addIceCandidate(candidate);
-          }
-        });
-      });
-    });
-    console.log("working");
-  };
-
-  //3. Answer the call with unique ID
-  const answerHandle = async () => {
-    const callId = callInput;
-    const callDoc = firebase.firestore().collection("calls").doc(callId);
-    const answerCandidates = callDoc.collection("answerCandidates");
-
-    pc.onicecandidate = (event) => {
-      event.candidate && answerCandidates.add(event.candidate.toJSON());
-    };
-
-    const callData = (await callDoc.get()).data();
-
-    const offerDescription = callData.offer;
-    await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
-
-    const answerDescription = await pc.createAnswer();
-    await pc.setLocalDescription(answerDescription);
-
-    const answer = {
-      type: answerDescription.type,
-      sdp: answerDescription.sdp,
-    };
-
-    await callDoc.update({ answer });
-
-    offerCandidates.onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        console.log(change);
-        let data = change.doc.data();
-        pc.addIceCandidate(new RTCIceCandidate(data));
-      });
-    });
-  };
-  //END OF WebRTC
 
   const messagesRef = firebase.firestore().collection("messages");
   const query = messagesRef.orderBy("createdAt").limit(50);
   const [messages] = useCollectionData(query, { idField: "id" });
+  const [formValue, setFormValue] = useState("");
+  const storage = getStorage(firebaseApp);
+
   function Chat() {
     function ChatMessage(props) {
-      const { text, uid, photoURL } = props.message;
+      const { image, text, uid, photoURL } = props.message;
       const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
       return (
         <div className={`flex space-x-2 space-y-2 ${messageClass}`}>
@@ -143,11 +34,15 @@ function Message() {
             src={photoURL}
             alt=""
           />
-          <p className="bg-indigo-500 p-2 py-1 rounded-xl ">{text}</p>
+          {text ? (
+            <p className="bg-indigo-500 p-2 py-1 rounded-xl">{text}</p>
+          ) : (
+            ""
+          )}
+          <img src={image} className="max-h-48 sm:max-h-96" alt="" />
         </div>
       );
     }
-
     return (
       <div className="px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
         {messages &&
@@ -156,11 +51,8 @@ function Message() {
     );
   }
 
-  const [formValue, setFormValue] = useState("");
-
   const sendMessage = async (e) => {
     e.preventDefault();
-
     if (formValue !== "") {
       const { uid, photoURL } = auth.currentUser;
       await messagesRef.add({
@@ -172,6 +64,23 @@ function Message() {
       setFormValue("");
     }
   };
+
+  const fileHandle = (event) => {
+    const file = event.target.files[0];
+    const fileImagesRef = ref(storage, "images/" + file.name);
+    uploadBytes(fileImagesRef, file).then((snapshot) => {
+    });
+    getDownloadURL(fileImagesRef).then(async (url) => {
+      const { uid, photoURL } = auth.currentUser;
+      await messagesRef.add({
+        image: url,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        uid,
+        photoURL,
+      });
+    });
+  };
+
   return (
     <section className="min-h-screen bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
       <div className="max-h-screen hidden sm:block col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
@@ -314,7 +223,7 @@ function Message() {
           <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-3xl text-gray-700 dark:text-gray-200">
             <h1 className="p-3 ml-3">Nyannnnnnnnn</h1>
             <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
-              <button onClick={startCalling}>
+              <button>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -330,7 +239,7 @@ function Message() {
                   />
                 </svg>
               </button>
-              <button onClick={videoCallHandle}>
+              <button>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -349,7 +258,6 @@ function Message() {
             </div>
           </div>
           <div className="h-5/6 space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
-            <video ref={localStreamRef} className="h-2/6"></video>
             <Chat />
           </div>
         </div>
@@ -359,10 +267,10 @@ function Message() {
             onSubmit={sendMessage}
             className="flex justify-center sm:px-3 xl:px-0"
           >
-            <button
-              href=""
-              className="text-gray-600 dark:text-gray-400 my-auto mr-4 transition hover:rotate-12"
+            <label
+              className="text-gray-600 dark:text-gray-400 my-auto mr-4 transition hover:rotate-12 cursor-pointer"
             >
+              <input type="file" className="hidden" onChange={fileHandle} />
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-7 w-7"
@@ -377,7 +285,7 @@ function Message() {
                   d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                 />
               </svg>
-            </button>
+            </label>
             <input
               className="w-5/6 rounded-full dark:bg-slate-900 border-gray-300 dark:border-indigo-500 dark:text-gray-200 focus:ring-0 focus:border-gray-300"
               type="text"
