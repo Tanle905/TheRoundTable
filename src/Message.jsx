@@ -39,12 +39,12 @@ function Message() {
           ) : (
             ""
           )}
-          <img src={image} className="max-h-40 sm:max-h-96" alt="" />
+          <img src={image} className="max-w-xs sm:max-w-full max-h-96 sm:max-h-96" alt="" />
         </div>
       );
     }
     return (
-      <div className="px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
+      <div className="px-1 sm:px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
         {messages &&
           messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
       </div>
@@ -222,13 +222,13 @@ function Message() {
       </div>
       <div className="max-h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
         <div className="row-span-5 ">
-          <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-3xl text-gray-700 dark:text-gray-200">
-            <h1 className="p-3 ml-3">Nyannnnnnnnn</h1>
+          <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-700 dark:text-gray-200">
+            <h1 className="p-1 sm:p-3 ml-3">Nyannnnnnnnn</h1>
             <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
               <button>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 transition hover:-translate-y-1"
+                  className="h-7 sm:h-8 w-7 sm:w-8 transition hover:-translate-y-1"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -271,7 +271,7 @@ function Message() {
           >
             <input type="file" className="hidden" id="selectedFile" onChange={fileHandle} />
             <label
-              className="text-gray-600 dark:text-gray-400 my-auto mr-4 transition hover:rotate-12 cursor-pointer"
+              className="text-gray-600 dark:text-gray-400 my-auto mx-1 sm:mr-4 transition hover:rotate-12 cursor-pointer"
               htmlFor="selectedFile"
             >
               <svg
@@ -298,7 +298,7 @@ function Message() {
             />
             <button
               href=""
-              className="text-blue-600 dark:text-indigo-500 my-auto ml-4 rotate-90 transition hover:rotate-0 "
+              className="text-blue-600 dark:text-indigo-500 my-auto mx-1 sm:ml-4 rotate-90 transition hover:rotate-0 "
               type="summit"
             >
               <svg

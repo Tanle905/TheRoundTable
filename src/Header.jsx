@@ -9,7 +9,7 @@ function Header() {
 
   return (
     <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
-      <div className="grid grid-cols-4 py-2">
+      <div className="grid grid-cols-4 sm:py-2">
         <div className="col-span-1 my-auto ml-2 flex text-blue-500 dark:text-indigo-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +32,7 @@ function Header() {
         <div className="col-span-3 flex justify-end">
           <div className="py-3 sm:mr-5 my-auto relative">
             <input
-              className="h-10 w-32 sm:w-64 ml-2 pr-12 bg-gray-200 dark:bg-slate-800 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 focus:w-44 sm:focus:w-96 focus:border-0 focus:ring-0 form-input"
+              className="h-10 w-32 sm:w-64 ml-2 pr-12 bg-gray-200 dark:bg-slate-800 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 focus:w-48 sm:focus:w-96 focus:border-0 focus:ring-0 form-input"
               type="search"
               name="search"
               placeholder="Search"
@@ -102,7 +102,7 @@ function Header() {
                 return (
                   <a
                     className="block p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500"
-                    href=""
+                   
                   >
                     <img
                       className="shrink-0 w-12 h-12 rounded-full cursor-pointer object-cover"
