@@ -1,11 +1,15 @@
+import React from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useCollectionData } from "react-firebase-hooks/firestore";
-import { useRef, useState } from "react";
+import { useCollectionData, useCollectionDataOnce } from "react-firebase-hooks/firestore";
+import { useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 function Message() {
+  /*Init and Variables Section*/
+  //Firebase init
   const firebaseApp = firebase.initializeApp({
     apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
     authDomain: "the-round-table-ffc3f.firebaseapp.com",
@@ -15,34 +19,136 @@ function Message() {
     appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
     measurementId: "G-3NRE8RWMTD",
   });
-  const auth = firebase.auth();
 
-  const messagesRef = firebase.firestore().collection("messages");
-  const query = messagesRef.orderBy("createdAt").limit(50);
-  const [messages] = useCollectionData(query, { idField: "id" });
-  const [formValue, setFormValue] = useState("");
+  //Users init and variables
+  const auth = firebase.auth();
+  const [user] = useAuthState(auth);
+  const userRef = firebase.firestore().collection("users");
+
+  //fileHandle init and variables
   const storage = getStorage(firebaseApp);
 
+  //Friends init and variable
+  const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
+  const userFriendRef = user
+    ? userRef.doc(user.uid).collection("friends")
+    : null;
+  const [userFriendsCollectionData] = useCollectionData(userFriendRef);
+  //check for better solution
+  const [activeFriend, setActiveFriend] = useState(
+    userFriendsCollectionData ? userFriendsCollectionData[0].friendUid : null
+  );
+  const [activeFriendName, setActiveFriendName] = useState(
+    userFriendsCollectionData ? userFriendsCollectionData[0].friendUid : null
+  );
+
+  // Messages init and variables
+  const messagesRef = firebase.firestore().collection("messages");
+  const [messageValue, setMessageValue] = useState("");
+  const messagesQuery = messagesRef.orderBy("createdAt").limit(50);
+  const [messages] = useCollectionData(messagesQuery, { idField: "id" });
+  const [currentMessage] = useCollectionDataOnce(messagesQuery, { idField: "id" });
+  /*END OF Init and Variables Section*/
+
+  /*Component Section*/
+  //Friends Section ( FriendsList and addFriend)
+  const [uidValue, setUidValue] = useState("");
+  const addfriend = (event) => {
+    if (!usersDataLoading && userRef) {
+      usersCollectionData.forEach((element) => {
+        if (element.uid === uidValue) {
+          userFriendRef.doc(uidValue).set({
+            friendEmail: element.email,
+            friendName: element.name,
+            friendUid: element.uid,
+            friendphotoURL: element.photoURL,
+          });
+          userRef.doc(uidValue).collection("friends").doc(user.uid).set({
+            friendEmail: user.email,
+            friendName: user.displayName,
+            friendUid: user.uid,
+            friendphotoURL: user.photoURL,
+          });
+        }
+      });
+      setUidValue("");
+    }
+  };
+
+  function Friends() {
+    const FriendsList = React.memo(function FriendsList(props) {
+      const { friendUid, friendName, friendphotoURL } = props.friends;
+      const friendClass =
+        friendUid === activeFriend ? "friend-active" : "friend-inactive";
+      const friendRefHandle = () => {
+        setActiveFriend(friendUid);
+        setActiveFriendName(friendName);
+      };
+
+      return (
+        <li
+          className={`group transition ${friendClass} `}
+          onClick={friendRefHandle}
+        >
+          <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+            <img
+              className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
+              src={friendphotoURL}
+              alt=""
+            />
+            <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
+              <h1 className="font-medium text-xl">{friendName}</h1>
+              <p className="truncate"></p>
+            </div>
+            <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
+              <p></p>
+            </div>
+          </div>
+        </li>
+      );
+    });
+    return (
+      <div>
+        {userFriendsCollectionData &&
+          userFriendsCollectionData.map((element, index) => (
+            <FriendsList friends={element} key={index} />
+          ))}
+      </div>
+    );
+  }
+  //END OF Friends Section ( FriendsList and addFriend)
+
+  //Chat section
   function Chat() {
     function ChatMessage(props) {
-      const { image, text, uid, photoURL } = props.message;
+      const { image, text, uid, photoURL, sendTo, sentFrom } = props.message;
       const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
-      return (
-        <div className={`flex space-x-2 space-y-2 ${messageClass}`}>
-          <img
-            className={`mb-1 rounded-full w-6 h-6 mt-auto ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
-            src={photoURL}
-            alt=""
-          />
-          {text ? (
-            <p className="bg-indigo-500 p-2 py-1 rounded-xl">{text}</p>
-          ) : (
-            ""
-          )}
-          <img src={image} className="max-w-xs sm:max-w-full max-h-96 sm:max-h-96" alt="" />
-        </div>
-      );
+      if (
+        (activeFriend === sendTo && auth.currentUser.uid === sentFrom) ||
+        (activeFriend === sentFrom && auth.currentUser.uid === sendTo)
+      ) {
+        return (
+          <div className={`flex space-x-2 space-y-2 ${messageClass}`}>
+            <img
+              className={`mb-1 rounded-full w-6 h-6 mt-auto ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
+              src={photoURL}
+              alt=""
+            />
+            {text ? (
+              <p className="bg-blue-500 dark:bg-indigo-500 p-2 py-1 rounded-xl">{text}</p>
+            ) : (
+              ""
+            )}
+            <img
+              src={image}
+              className="max-w-xs sm:max-w-full max-h-96 sm:max-h-96 rounded-xl"
+              alt=""
+            />
+          </div>
+        );
+      } else return <div></div>;
     }
+
     return (
       <div className="px-1 sm:px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
         {messages &&
@@ -53,25 +159,27 @@ function Message() {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (formValue !== "") {
+    if (messageValue !== "") {
       const { uid, photoURL } = auth.currentUser;
-      await messagesRef.add({
-        text: formValue,
+      await messagesRef.doc().set({
+        text: messageValue,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         uid,
         photoURL,
+        sentFrom: user.uid,
+        sendTo: activeFriend,
       });
-      setFormValue("");
+      setMessageValue("");
     }
   };
+  //END OF Chat section
 
+  //fileHandle section
   const fileHandle = async (event) => {
     event.preventDefault();
     const file = event.target.files[0];
     const fileImagesRef = ref(storage, "images/" + file.name);
-    await uploadBytes(fileImagesRef, file).then((snapshot) => {
-      console.log('sending')
-    });
+    await uploadBytes(fileImagesRef, file).then((snapshot) => {});
     getDownloadURL(fileImagesRef).then(async (url) => {
       const { uid, photoURL } = auth.currentUser;
       await messagesRef.add({
@@ -79,10 +187,13 @@ function Message() {
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         uid,
         photoURL,
+        sentFrom: user.uid,
+        sendTo: activeFriend,
       });
     });
   };
-
+  //END OF fileHandle section
+  /*END OF Component Section*/
   return (
     <section className="min-h-screen bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
       <div className="max-h-screen hidden sm:block col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
@@ -97,7 +208,7 @@ function Message() {
               name="search"
               placeholder="Search for Friends..."
             />
-            <button className="absolute right-2 top-0 mt-5 text-gray-600 dark:text-gray-50 transition-all hover:text-gray-800">
+            <button className="absolute right-2 top-0 mt-5 text-gray-600 dark:text-gray-50 transition-all hover:text-gray-800 dark:hover:text-gray-300">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -114,116 +225,41 @@ function Message() {
               </svg>
             </button>
           </div>
-          <button className="my-auto text-gray-600 dark:text-gray-50 ml-2 duration-200 transition hover:rotate-180">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+          <form className="py-3 my-auto relative group" onSubmit={addfriend}>
+            <input
+              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 sm:group-hover:w-36 xl:group-hover:w-56 focus:border-0 focus:ring-0 form-input"
+              type="text"
+              placeholder="Add a Friend UID"
+              value={uidValue}
+              onChange={(e) => setUidValue(e.target.value)}
+            />
+            <button
+              className="absolute right-2 top-0 mt-5 text-gray-600 dark:text-gray-50 transition-all group-hover:rotate-180"
+              type="submit"
             >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </form>
         </div>
         <ul className="space-y-3">
-          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
-              <a href="" className="col-span-1">
-                <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
-                  src="https://placekitten.com/200/200"
-                  alt=""
-                />
-              </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
-                <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
-                <p className="truncate">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Varius quam quisque id diam vel quam elementum.
-                </p>
-              </div>
-              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
-                <p>25m</p>
-              </div>
-            </div>
-          </li>
-          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
-              <a href="" className="col-span-1">
-                <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
-                  src="https://placekitten.com/200/222"
-                  alt=""
-                />
-              </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
-                <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
-                <p className="truncate">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Varius quam quisque id diam vel quam elementum.
-                </p>
-              </div>
-              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
-                <p>25m</p>
-              </div>
-            </div>
-          </li>
-          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
-              <a href="" className="col-span-1">
-                <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
-                  src="https://placekitten.com/200/233"
-                  alt=""
-                />
-              </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
-                <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
-                <p className="truncate">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Varius quam quisque id diam vel quam elementum.
-                </p>
-              </div>
-              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
-                <p>25m</p>
-              </div>
-            </div>
-          </li>
-          <li className="hover:bg-gray-200 dark:hover:bg-slate-800 group transition">
-            <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
-              <a href="" className="col-span-1">
-                <img
-                  className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
-                  src="https://placekitten.com/200/244"
-                  alt=""
-                />
-              </a>
-              <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
-                <h1 className="font-medium text-xl">Nyannnnnnnnn</h1>
-                <p className="truncate">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Varius quam quisque id diam vel quam elementum.
-                </p>
-              </div>
-              <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
-                <p>25m</p>
-              </div>
-            </div>
-          </li>
+          <Friends />
         </ul>
       </div>
       <div className="max-h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
         <div className="row-span-5 ">
           <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-700 dark:text-gray-200">
-            <h1 className="p-1 sm:p-3 ml-3">Nyannnnnnnnn</h1>
+            <h1 className="p-1 sm:p-3 ml-3">{activeFriendName}</h1>
             <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
               <button>
                 <svg
@@ -269,7 +305,12 @@ function Message() {
             onSubmit={sendMessage}
             className="flex justify-center sm:px-3 xl:px-0"
           >
-            <input type="file" className="hidden" id="selectedFile" onChange={fileHandle} />
+            <input
+              type="file"
+              className="hidden"
+              id="selectedFile"
+              onChange={fileHandle}
+            />
             <label
               className="text-gray-600 dark:text-gray-400 my-auto mx-1 sm:mr-4 transition hover:rotate-12 cursor-pointer"
               htmlFor="selectedFile"
@@ -293,8 +334,8 @@ function Message() {
               className="w-5/6 rounded-full dark:bg-slate-900 border-gray-300 dark:border-indigo-500 dark:text-gray-200 focus:ring-0 focus:border-gray-300"
               type="text"
               placeholder="Type messages here..."
-              value={formValue}
-              onChange={(e) => setFormValue(e.target.value)}
+              value={messageValue}
+              onChange={(e) => setMessageValue(e.target.value)}
             />
             <button
               href=""

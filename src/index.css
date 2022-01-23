@@ -16,11 +16,17 @@ code {
 @tailwind utilities;
 
 @layer components {
+  .friend-inactive{
+    @apply dark:hover:bg-slate-800 hover:bg-gray-100
+  }
+  .friend-active{
+    @apply bg-gradient-to-r dark:bg-gradient-to-r from-blue-300 dark:from-indigo-700 to-transparent dark:to-transparent
+  }
   .sent{
-    @apply justify-start flex-row-reverse
+    @apply justify-start flex-row-reverse 
   }
   .received{
-    @apply justify-start
+    @apply justify-start 
   }
   .sent img{
     @apply ml-2 mr-0

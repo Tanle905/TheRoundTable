@@ -6,8 +6,9 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import SignIn from "./SignIn";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 
-firebase.initializeApp({
+const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
   authDomain: "the-round-table-ffc3f.firebaseapp.com",
   projectId: "the-round-table-ffc3f",
@@ -17,18 +18,38 @@ firebase.initializeApp({
   measurementId: "G-3NRE8RWMTD",
 });
 
-function App() {
+const App = () => {
   const auth = firebase.auth();
-  const [user] = useAuthState(auth);
+  const [user, authLoading] = useAuthState(auth);
+  const userRef = firebase.firestore().collection("users");
 
-  if (user) {
-    return (
+  const addUser = () => {
+    if (!authLoading) {
+      userRef.doc(user.uid).set({
+        email: user.email,
+        name: user.displayName,
+        uid: user.uid,
+        photoURL: user.photoURL,
+      });
+    }
+  };
+
+  let someThing;
+  if (user && !authLoading) {
+    addUser();
+    someThing = (
       <div className="">
         <Header />
         <Message />
       </div>
     );
-  } else return <SignIn />;
-}
+  } else if (!user && !authLoading) {
+    someThing = <SignIn />;
+  } else {
+    someThing = <div></div>;
+  }
 
-export default App;
+  return <div>{someThing}</div>;
+};
+
+export { App, firebaseApp };

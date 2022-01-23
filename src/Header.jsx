@@ -5,7 +5,6 @@ import "firebase/compat/auth";
 
 function Header() {
   const auth = firebase.auth();
-  const user = firebase.auth().currentUser;
 
   return (
     <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
@@ -30,9 +29,12 @@ function Header() {
           </h3>
         </div>
         <div className="col-span-3 flex justify-end">
+          <p className="text-gray-800 dark:text-gray-200 mr-3 my-auto">
+            <span className="font-semibold">Your UID:</span> {auth.currentUser.uid}
+          </p>
           <div className="py-3 sm:mr-5 my-auto relative">
             <input
-              className="h-10 w-32 sm:w-64 ml-2 pr-12 bg-gray-200 dark:bg-slate-800 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 focus:w-48 sm:focus:w-96 focus:border-0 focus:ring-0 form-input"
+              className="h-10 w-32 sm:w-64 ml-2 pr-12 bg-gray-200 dark:bg-slate-800 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 focus:w-44 sm:focus:w-96 focus:border-0 focus:ring-0 form-input"
               type="search"
               name="search"
               placeholder="Search"
@@ -56,11 +58,11 @@ function Header() {
           </div>
           <div className="my-auto mr-5">
             <ul className="col-span-1 flex space-x-5 text-xl font-semibold text-blue-600 dark:text-gray-300 hidden sm:flex">
-              <li className="duration-100 hover:text-blue-500 dark:hover:text-gray-50 hover:scale-105">
+              <li className="duration-100 hover:text-blue-500 dark:hover:text-indigo-500 hover:scale-105">
                 <a href="" className="flex group">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 transition group-hover:-rotate-6"
+                    className="h-6 w-6 group-hover:-rotate-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -75,11 +77,11 @@ function Header() {
                   Chat
                 </a>
               </li>
-              <li className="duration-100 hover:text-blue-500 dark:hover:text-gray-50 hover:scale-105">
+              <li className="duration-100 hover:text-blue-500 dark:hover:text-indigo-500 hover:scale-105">
                 <a href="" className="flex group">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 transition group-hover:-rotate-6"
+                    className="h-6 w-6  group-hover:-rotate-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -100,13 +102,10 @@ function Header() {
             <Dropdown
               host={function () {
                 return (
-                  <a
-                    className="block p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500"
-                   
-                  >
+                  <a className="block p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500">
                     <img
                       className="shrink-0 w-12 h-12 rounded-full cursor-pointer object-cover"
-                      src={user.photoURL}
+                      src={auth.currentUser.photoURL}
                       alt=""
                     />
                   </a>
@@ -167,7 +166,7 @@ function Header() {
                         d="M11.02 3.77v1.56l1-.99V2.5l-.5-.5h-9l-.5.5v.486L2 3v10.29l.36.46 5 1.72L8 15v-1h3.52l.5-.5v-1.81l-1-1V13H8V4.71l-.33-.46L4.036 3h6.984v.77zM7 14.28l-4-1.34V3.72l4 1.34v9.22zm6.52-5.8H8.55v-1h4.93l-1.6-1.6.71-.7 2.47 2.46v.71l-2.49 2.48-.7-.7 1.65-1.65z"
                       />
                     </svg>
-                    <p onClick={()=>auth.signOut()}>Sign Out</p>
+                    <p onClick={() => auth.signOut()}>Sign Out</p>
                   </div>,
                 ],
               }}
