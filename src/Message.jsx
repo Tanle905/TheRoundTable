@@ -36,10 +36,10 @@ function Message() {
   const [userFriendsCollectionData] = useCollectionData(userFriendRef);
   //check for better solution
   const [activeFriend, setActiveFriend] = useState(
-    userFriendsCollectionData ? userFriendsCollectionData[0].friendUid : null
+    ['']
   );
   const [activeFriendName, setActiveFriendName] = useState(
-    userFriendsCollectionData ? userFriendsCollectionData[0].friendUid : null
+    ['']
   );
 
   // Messages init and variables
