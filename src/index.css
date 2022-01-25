@@ -1,14 +1,14 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 @tailwind base;
@@ -16,19 +16,29 @@ code {
 @tailwind utilities;
 
 @layer components {
-  .friend-inactive{
-    @apply dark:hover:bg-slate-800 hover:bg-gray-100
+  .friend-inactive {
+    @apply dark:hover:bg-slate-800 hover:bg-gray-100;
   }
-  .friend-active{
-    @apply bg-gradient-to-r dark:bg-gradient-to-r from-blue-300 dark:from-indigo-700 to-transparent dark:to-transparent
+  .friend-active {
+    @apply bg-gradient-to-r dark:bg-gradient-to-r from-blue-300 dark:from-indigo-700 to-transparent dark:to-transparent;
   }
-  .sent{
-    @apply justify-start flex-row-reverse 
+  .sent {
+    @apply justify-start flex-row-reverse;
   }
-  .received{
-    @apply justify-start 
+  .received {
+    @apply justify-start;
   }
-  .sent img{
-    @apply ml-2 mr-0
+  .sent img {
+    @apply ml-2 mr-0;
+  }
+  ::-webkit-scrollbar {
+    @apply w-1
+    
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-200 dark:bg-slate-800 rounded-sm
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-blue-400/60 dark:bg-indigo-600/50 rounded-sm
   }
 }

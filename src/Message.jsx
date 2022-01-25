@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
@@ -9,6 +9,7 @@ import {
 } from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
+import moment from "moment";
 
 function Message() {
   /*Init and Variables Section*/
@@ -31,6 +32,12 @@ function Message() {
   //fileHandle init and variables
   const storage = getStorage(firebaseApp);
 
+  //Friends init and variable
+  const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
+  const userFriendRef = user
+    ? userRef.doc(user.uid).collection("friends")
+    : null;
+  const [userFriendsCollectionData] = useCollectionData(userFriendRef);
   //check for better solution
   const [activeFriend, setActiveFriend] = useState([""]);
   const [activeFriendName, setActiveFriendName] = useState([""]);
@@ -45,7 +52,6 @@ function Message() {
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
   const [uidValue, setUidValue] = useState("");
-  const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
   const addfriend = (event) => {
     if (!usersDataLoading && userRef) {
       usersCollectionData.forEach((element) => {
@@ -67,25 +73,29 @@ function Message() {
       setUidValue("");
     }
   };
+  useEffect(() => {
+    setActiveFriend(
+      userFriendsCollectionData != null &&
+        userFriendsCollectionData.length != 0 &&
+        userFriendsCollectionData[0].friendUid
+    );
+    setActiveFriendName(
+      userFriendsCollectionData != null &&
+        userFriendsCollectionData.length != 0 &&
+        userFriendsCollectionData[0].friendName
+    );
+  }, [userFriendsCollectionData]);
 
   function Friends({ msg }) {
-    //Friends init and variable
-    const userFriendRef = user
-      ? firebase
-          .firestore()
-          .collection("users")
-          .doc(user.uid)
-          .collection("friends")
-      : null;
-    const [userFriendsCollectionData] = useCollectionData(userFriendRef);
     const FriendsList = React.memo(function FriendsList(props) {
+      const { friendUid, friendName, friendphotoURL } = props.friends;
+      const friendClass =
+        friendUid === activeFriend ? "friend-active" : "friend-inactive";
       const friendRefHandle = () => {
         setActiveFriend(friendUid);
         setActiveFriendName(friendName);
       };
-      const { friendUid, friendName, friendphotoURL } = props.friends;
-      const friendClass =
-        friendUid === activeFriend ? "friend-active" : "friend-inactive";
+
       const filteredMessages =
         friendUid &&
         props.msg &&
@@ -98,7 +108,6 @@ function Message() {
           )
             return message;
         });
-      console.log(filteredMessages);
       return (
         <li
           className={`group transition ${friendClass} `}
@@ -106,21 +115,21 @@ function Message() {
         >
           <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
             <img
-              className="w-16 h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-600"
+              className="w-16 max-h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-400"
               src={friendphotoURL}
               alt=""
             />
             <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
               <h1 className="font-medium text-xl">{friendName}</h1>
               <p className="truncate flex">
-                <p className="mr-2">
+                <span className="mr-2">
                   {filteredMessages && filteredMessages.length !== 0
                     ? filteredMessages[filteredMessages.length - 1].uid ===
                       friendUid
                       ? ""
                       : "Bạn: "
                     : ""}
-                </p>
+                </span>
                 {filteredMessages && filteredMessages.length !== 0
                   ? filteredMessages[filteredMessages.length - 1].text
                   : ""}
@@ -147,8 +156,12 @@ function Message() {
   //Chat section
   function Chat() {
     function ChatMessage(props) {
-      const { image, text, uid, photoURL, sendTo, sentFrom } = props.message;
+      const { image, text, uid, photoURL, sendTo, sentFrom, createdAt } =
+        props.message;
       const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
+      const date =
+        createdAt != null &&
+        moment(createdAt.toDate()).format("MMMM Do YYYY, h:mm:ss a");
       if (
         (activeFriend === sendTo && auth.currentUser.uid === sentFrom) ||
         (activeFriend === sentFrom && auth.currentUser.uid === sendTo)
@@ -167,18 +180,23 @@ function Message() {
             ) : (
               ""
             )}
-            <img
-              src={image}
-              className="max-w-xs sm:max-w-full max-h-96 sm:max-h-96 rounded-xl"
-              alt=""
-            />
+            {image && (
+              <img
+                src={image}
+                className="w-60 sm:w-auto max-w-xs xl:max-w-full max-h-96 sm:max-h-80 rounded-xl"
+                alt=""
+              />
+            )}
+            <p className="text-xs sm:text-sm font-thin text-gray-800 dark:text-gray-400 self-center">
+              {date}
+            </p>
           </div>
         );
       } else return <div></div>;
     }
 
     return (
-      <div className="px-1 sm:px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
+      <div className="px-1 xl:px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
         {messages &&
           messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
       </div>
@@ -220,6 +238,43 @@ function Message() {
       });
     });
   };
+  function File({ imgs }) {
+    const filteredImgs =
+      imgs != null &&
+      imgs.filter((img) => {
+        if (
+          (activeFriend === img.sendTo &&
+            auth.currentUser.uid === img.sentFrom) ||
+          (activeFriend === img.sentFrom && auth.currentUser.uid === img.sendTo)
+        )
+          return img.image;
+      });
+    function FileRender({ img }) {
+      return (
+        <li>
+          <a
+            className="cursor-pointer"
+            onClick={() => window.open(img.image, img.image).focus()}
+          >
+            <img
+              className="rounded-md max-w-md h-16 object-cover transition hover:-translate-y-1"
+              src={img.image}
+              alt=""
+            />
+          </a>
+        </li>
+      );
+    }
+    return (
+      <ul className="flex space-x-2 overflow-auto p-2">
+        {imgs &&
+          filteredImgs.map((img, index) => {
+            if (filteredImgs.length < 6 || index > filteredImgs.length - 6)
+              return <FileRender img={img} key={index} />;
+          })}
+      </ul>
+    );
+  }
   //END OF fileHandle section
   /*END OF Component Section*/
   return (
@@ -287,7 +342,7 @@ function Message() {
       <div className="h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
         <div className="row-span-5 ">
           <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-700 dark:text-gray-200">
-            <h1 className="p-1 sm:p-3 ml-3">{activeFriendName}</h1>
+            <h1 className="p-1 xl:p-3 ml-3">{activeFriendName}</h1>
             <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
               <button>
                 <svg
@@ -323,7 +378,7 @@ function Message() {
               </button>
             </div>
           </div>
-          <div className="h-5/6 space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+          <div className="h-5/6 space-y-4 p-1 sm:p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
             <Chat />
           </div>
         </div>
@@ -382,46 +437,9 @@ function Message() {
           </form>
         </div>
       </div>
-      <div className="max-h-screen hidden sm:block sm:col-start-10 xl:col-start-11 sm:col-span-3 xl:col-span-2 shadow-md shadow-gray-500 dark:shadow-slate-800">
+      <div className="max-h-screen hidden sm:block sm:col-start-10 xl:col-start-11 sm:col-span-3 xl:col-span-2 pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800">
         <div className="mx-3">
-          <ul className="flex space-x-2 justify-center">
-            <li>
-              <a href="">
-                <img
-                  className="rounded-md w-16 h-16 transition hover:-translate-y-1"
-                  src="https://placekitten.com/200/222"
-                  alt=""
-                />
-              </a>
-            </li>
-            <li>
-              <a href="">
-                <img
-                  className="rounded-md w-16 h-16 transition hover:-translate-y-1"
-                  src="https://placekitten.com/200/222"
-                  alt=""
-                />
-              </a>
-            </li>
-            <li>
-              <a href="">
-                <img
-                  className="rounded-md w-16 h-16 transition hover:-translate-y-1"
-                  src="https://placekitten.com/200/222"
-                  alt=""
-                />
-              </a>
-            </li>
-            <li>
-              <a href="">
-                <img
-                  className="rounded-md w-16 h-16 transition hover:-translate-y-1"
-                  src="https://placekitten.com/200/222"
-                  alt=""
-                />
-              </a>
-            </li>
-          </ul>
+          <File imgs={messages} />
           <a href="" className="text-center">
             <h1 className="font-semibold text-md text-blue-600 dark:text-gray-300 transition hover:underline">
               View shared file...
@@ -431,7 +449,7 @@ function Message() {
         <div className="grid grid-cols-2 content-center">
           <a
             href="#"
-            className="col-span-1 py-4 text-center text-blue-600 dark:text-indigo-500 text-md font-medium border-b-4 border-blue-700 dark:border-indigo-500 flex group active"
+            className="col-span-1 py-4 text-center text-blue-600 dark:text-indigo-500 text-md font-medium border-b-4 border-blue-600 dark:border-indigo-500 flex group active"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
