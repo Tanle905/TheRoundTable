@@ -3,7 +3,10 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useCollectionData, useCollectionDataOnce } from "react-firebase-hooks/firestore";
+import {
+  useCollectionData,
+  useCollectionDataOnce,
+} from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -28,31 +31,21 @@ function Message() {
   //fileHandle init and variables
   const storage = getStorage(firebaseApp);
 
-  //Friends init and variable
-  const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
-  const userFriendRef = user
-    ? userRef.doc(user.uid).collection("friends")
-    : null;
-  const [userFriendsCollectionData] = useCollectionData(userFriendRef);
   //check for better solution
-  const [activeFriend, setActiveFriend] = useState(
-    ['']
-  );
-  const [activeFriendName, setActiveFriendName] = useState(
-    ['']
-  );
+  const [activeFriend, setActiveFriend] = useState([""]);
+  const [activeFriendName, setActiveFriendName] = useState([""]);
 
   // Messages init and variables
   const messagesRef = firebase.firestore().collection("messages");
   const [messageValue, setMessageValue] = useState("");
   const messagesQuery = messagesRef.orderBy("createdAt").limit(50);
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
-  const [currentMessage] = useCollectionDataOnce(messagesQuery, { idField: "id" });
   /*END OF Init and Variables Section*/
 
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
   const [uidValue, setUidValue] = useState("");
+  const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
   const addfriend = (event) => {
     if (!usersDataLoading && userRef) {
       usersCollectionData.forEach((element) => {
@@ -75,16 +68,37 @@ function Message() {
     }
   };
 
-  function Friends() {
+  function Friends({ msg }) {
+    //Friends init and variable
+    const userFriendRef = user
+      ? firebase
+          .firestore()
+          .collection("users")
+          .doc(user.uid)
+          .collection("friends")
+      : null;
+    const [userFriendsCollectionData] = useCollectionData(userFriendRef);
     const FriendsList = React.memo(function FriendsList(props) {
-      const { friendUid, friendName, friendphotoURL } = props.friends;
-      const friendClass =
-        friendUid === activeFriend ? "friend-active" : "friend-inactive";
       const friendRefHandle = () => {
         setActiveFriend(friendUid);
         setActiveFriendName(friendName);
       };
-
+      const { friendUid, friendName, friendphotoURL } = props.friends;
+      const friendClass =
+        friendUid === activeFriend ? "friend-active" : "friend-inactive";
+      const filteredMessages =
+        friendUid &&
+        props.msg &&
+        props.msg.filter((message) => {
+          if (
+            (friendUid === message.sendTo &&
+              auth.currentUser.uid === message.sentFrom) ||
+            (friendUid === message.sentFrom &&
+              auth.currentUser.uid === message.sendTo)
+          )
+            return message;
+        });
+      console.log(filteredMessages);
       return (
         <li
           className={`group transition ${friendClass} `}
@@ -98,7 +112,19 @@ function Message() {
             />
             <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
               <h1 className="font-medium text-xl">{friendName}</h1>
-              <p className="truncate"></p>
+              <p className="truncate flex">
+                <p className="mr-2">
+                  {filteredMessages && filteredMessages.length !== 0
+                    ? filteredMessages[filteredMessages.length - 1].uid ===
+                      friendUid
+                      ? ""
+                      : "Bạn: "
+                    : ""}
+                </p>
+                {filteredMessages && filteredMessages.length !== 0
+                  ? filteredMessages[filteredMessages.length - 1].text
+                  : ""}
+              </p>
             </div>
             <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
               <p></p>
@@ -111,7 +137,7 @@ function Message() {
       <div>
         {userFriendsCollectionData &&
           userFriendsCollectionData.map((element, index) => (
-            <FriendsList friends={element} key={index} />
+            <FriendsList friends={element} key={index} msg={msg} />
           ))}
       </div>
     );
@@ -135,7 +161,9 @@ function Message() {
               alt=""
             />
             {text ? (
-              <p className="bg-blue-500 dark:bg-indigo-500 p-2 py-1 rounded-xl">{text}</p>
+              <p className="bg-blue-500 dark:bg-indigo-500 p-2 py-1 rounded-xl">
+                {text}
+              </p>
             ) : (
               ""
             )}
@@ -195,7 +223,7 @@ function Message() {
   //END OF fileHandle section
   /*END OF Component Section*/
   return (
-    <section className="min-h-screen bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
+    <section className="min-h-[89vh] sm:min-h-[90vh] bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
       <div className="max-h-screen hidden sm:block col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
         <div className="p-4 py-1 flex border-b-2 border-gray-200 dark:border-slate-800">
           <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
@@ -253,10 +281,10 @@ function Message() {
           </form>
         </div>
         <ul className="space-y-3">
-          <Friends />
+          <Friends msg={messages} />
         </ul>
       </div>
-      <div className="max-h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
+      <div className="h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
         <div className="row-span-5 ">
           <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-700 dark:text-gray-200">
             <h1 className="p-1 sm:p-3 ml-3">{activeFriendName}</h1>
