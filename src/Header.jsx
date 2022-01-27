@@ -30,7 +30,7 @@ function Header() {
         </div>
         <div className="sm:col-span-3 flex justify-end">
           <p className="text-gray-800 dark:text-gray-200 p-1 mr-1 sm:mr-5 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl">
-            <span className="font-semibold">Your UID:</span> {auth.currentUser.uid}
+            <span className="font-semibold hidden sm:inline">UID:</span> {auth.currentUser.uid}
           </p>
           <div className="my-auto sm:mr-5">
             <ul className="col-span-1 flex space-x-5 text-xl font-semibold text-blue-600 dark:text-gray-300 hidden sm:flex">

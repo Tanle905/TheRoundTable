@@ -32,7 +32,7 @@ code {
     @apply ml-2 mr-0;
   }
   ::-webkit-scrollbar {
-    @apply w-1
+    @apply w-1 h-2 bg-gray-200 dark:bg-slate-800
     
   }
   ::-webkit-scrollbar-track {
