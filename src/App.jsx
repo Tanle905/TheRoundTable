@@ -6,7 +6,6 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import SignIn from "./SignIn";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 
 const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
@@ -30,7 +29,7 @@ const App = () => {
         name: user.displayName,
         uid: user.uid,
         photoURL: user.photoURL,
-      })
+      });
     }
   };
 
@@ -38,7 +37,7 @@ const App = () => {
   if (user && !authLoading) {
     addUser();
     someThing = (
-      <div className="">
+      <div className="h-screen overflow-hidden">
         <Header />
         <Message />
       </div>
@@ -46,7 +45,11 @@ const App = () => {
   } else if (!user && !authLoading) {
     someThing = <SignIn />;
   } else {
-    someThing = <div></div>;
+    someThing = (
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex place-content-center">
+        <div className="animate-bounce my-auto w-24 h-24 bg-blue-500 dark:bg-indigo-500 rounded-lg shadow-2xl dark:shadow-indigo-800/75"></div>
+      </div>
+    );
   }
 
   return <div>{someThing}</div>;

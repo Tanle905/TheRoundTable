@@ -9,7 +9,7 @@ function Header() {
   return (
     <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
       <div className="flex sm:grid sm:grid-cols-4 sm:py-2">
-        <div className="sm:col-span-1 my-auto sm:ml-2 flex text-blue-500 dark:text-indigo-600">
+        <div className="sm:col-span-2 my-auto sm:ml-2 flex text-blue-500 dark:text-indigo-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-16 h-16"
@@ -28,14 +28,12 @@ function Header() {
             Welcome to The Round Table!!!
           </h3>
         </div>
-        <div className="sm:col-span-3 flex justify-end">
-          <p className="text-gray-800 dark:text-gray-200 p-1 mr-1 sm:mr-5 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl">
-            <span className="font-semibold hidden sm:inline">UID:</span> {auth.currentUser.uid}
-          </p>
+        <div className="sm:col-span-2 ml-auto flex justify-end">
+          
           <div className="my-auto sm:mr-5">
-            <ul className="col-span-1 flex space-x-5 text-xl font-semibold text-blue-600 dark:text-gray-300 hidden sm:flex">
+            <ul className="col-span-1 flex space-x-5 text-xl font-semibold text-blue-600 dark:text-gray-300">
               <li className="duration-100 hover:text-blue-500 dark:hover:text-indigo-500 hover:scale-105">
-                <a href="" className="flex group">
+                <a href="#" className="flex group">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6 group-hover:-rotate-6"
@@ -54,7 +52,7 @@ function Header() {
                 </a>
               </li>
               <li className="duration-100 hover:text-blue-500 dark:hover:text-indigo-500 hover:scale-105">
-                <a href="" className="flex group">
+                <a href="#" className="flex group">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6  group-hover:-rotate-6"
@@ -78,7 +76,7 @@ function Header() {
             <Dropdown
               host={function () {
                 return (
-                  <a className="block p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500">
+                  <a className="block ml-5 sm:ml-0 p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500">
                     <img
                       className="max-w-full max-h-12 rounded-full cursor-pointer object-cover"
                       src={auth.currentUser.photoURL}

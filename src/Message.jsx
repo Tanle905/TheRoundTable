@@ -7,6 +7,8 @@ import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import moment from "moment";
+import SlideOver from "./SlideOver";
+import SlideOver2 from "./SlideOver2";
 
 function Message() {
   /*Init and Variables Section*/
@@ -29,8 +31,11 @@ function Message() {
 
   //fileHandle init and variables
   const storage = getStorage(firebaseApp);
+  const [showFile, setShowFile] = useState(false);
 
   //Friends init and variable
+  const [uidValue, setUidValue] = useState("");
+  const [showFriendList, setShowFriendList] = useState(false);
   const userFriendRef = user
     ? userRef.doc(user.uid).collection("friends")
     : null;
@@ -61,10 +66,9 @@ function Message() {
         userFriendsCollectionData[0].friendName
     );
   }, [userFriendsCollectionData]);
-
   function Friends({ msg }) {
-    const [uidValue, setUidValue] = useState("");
     const addfriend = (event) => {
+      event.preventDefault();
       if (!usersDataLoading && userRef) {
         usersCollectionData.forEach((element) => {
           if (element.uid === uidValue) {
@@ -106,54 +110,64 @@ function Message() {
           )
             return message;
         });
+      const latestMessages =
+        filteredMessages != null &&
+        filteredMessages.length !== 0 &&
+        filteredMessages[filteredMessages.length - 1].createdAt != null &&
+        filteredMessages[filteredMessages.length - 1].createdAt.toDate();
       return (
         <li
           className={`group transition ${friendClass} `}
           onClick={friendRefHandle}
         >
-          <div className="p-3 space-x-5 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+          <div className="p-3 space-x-2 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
             <img
               className="w-16 max-h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-400"
               src={friendphotoURL}
               alt=""
             />
             <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
-              <h1 className="font-medium text-xl">{friendName}</h1>
+              <h1 className="font-medium text-lg sm:text-xl">{friendName}</h1>
               <p className="truncate flex">
                 <span className="mr-2">
                   {filteredMessages && filteredMessages.length !== 0
                     ? filteredMessages[filteredMessages.length - 1].uid ===
                       friendUid
                       ? ""
-                      : "Bạn: "
+                      : "Bạn:"
                     : ""}
                 </span>
                 {filteredMessages &&
                 filteredMessages.length !== 0 &&
                 filteredMessages[filteredMessages.length - 1].text
                   ? filteredMessages[filteredMessages.length - 1].text
-                  : "đã gửi 1 ảnh"}
+                  : filteredMessages &&
+                    filteredMessages.length !== 0 &&
+                    "đã gửi 1 ảnh"}
               </p>
             </div>
             <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
-              <p></p>
+              <p className="text-xs">
+                {moment(latestMessages).startOf("minute").fromNow()}
+              </p>
             </div>
           </div>
         </li>
       );
     });
     return (
-      <React.Fragment>
+      <div>
         <div className="p-4 py-1 flex border-b-2 border-gray-200 dark:border-slate-800">
           <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
             Chats
           </h1>
-          <div className="py-3 my-auto ml-auto sm:mr-5 relative group">
+          <form className="py-3 my-auto ml-auto sm:mr-5 relative group">
             <input
-              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 sm:group-hover:w-36 xl:group-hover:w-56 focus:border-0 focus:ring-0 form-input"
+              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 group-hover:w-36 focus:w-36 xl:group-hover:w-56 xl:focus:w-56 focus:border-0 focus:ring-0 form-input"
               type="search"
               name="search"
               placeholder="Search for Friends..."
+              autoFocus={false}
             />
             <button className="absolute right-2 top-0 mt-5 text-gray-600 dark:text-gray-50 transition-all hover:text-gray-800 dark:hover:text-gray-300">
               <svg
@@ -171,10 +185,10 @@ function Message() {
                 />
               </svg>
             </button>
-          </div>
+          </form>
           <form className="py-3 my-auto relative group" onSubmit={addfriend}>
             <input
-              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 sm:group-hover:w-36 xl:group-hover:w-56 focus:border-0 focus:ring-0 form-input"
+              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 group-hover:w-36 focus:w-36 xl:group-hover:w-56 xl:focus:w-56 focus:border-0 focus:ring-0 form-input"
               type="text"
               placeholder="Add a Friend UID"
               value={uidValue}
@@ -199,13 +213,16 @@ function Message() {
             </button>
           </form>
         </div>
-        <ul className="space-y-3">
+        <ul className="space-y-3 flex flex-col h-screen overflow-auto">
+          <p className="text-gray-800 dark:text-gray-200 p-1 mt-3 mb-0 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl place-self-center">
+            <span className="font-semibold">UID:</span> {auth.currentUser.uid}
+          </p>
           {userFriendsCollectionData &&
             userFriendsCollectionData.map((element, index) => (
               <FriendsList friends={element} key={index} msg={msg} />
             ))}
         </ul>
-      </React.Fragment>
+      </div>
     );
   }
   //END OF Friends Section ( FriendsList and addFriend)
@@ -231,7 +248,7 @@ function Message() {
               alt=""
             />
             {text ? (
-              <p className="bg-blue-500 dark:bg-indigo-500 p-2 py-1 rounded-xl">
+              <p className="max-w-[15rem] sm:max-w-xl break-words whitespace-normal bg-blue-500 dark:bg-indigo-500 p-2 py-1 rounded-xl">
                 {text}
               </p>
             ) : (
@@ -249,7 +266,7 @@ function Message() {
             </p>
           </div>
         );
-      } else return <div></div>;
+      } else return "";
     }
 
     return (
@@ -314,7 +331,7 @@ function Message() {
             onClick={() => window.open(img.image, img.image).focus()}
           >
             <img
-              className="rounded-md max-w-md h-16 object-cover transition hover:-translate-y-1"
+              className="rounded-md max-w-md h-56 sm:h-28 object-cover transition hover:-translate-y-1"
               src={img.image}
               alt=""
             />
@@ -323,29 +340,116 @@ function Message() {
       );
     }
     return (
-      <ul className="flex flex-row-reverse justify-end py-2">
-        {imgs &&
-          filteredImgs.map((img, index) => {
-            if (filteredImgs.length < 6 || index > filteredImgs.length - 10)
-              return <FileRender img={img} key={index} />;
-          })}
-      </ul>
+      <div>
+        <div className="mx-3">
+          <div className="overflow-auto">
+            <ul className="max-h-60 sm:max-h-32 flex flex-row-reverse justify-end py-2">
+              {imgs &&
+                filteredImgs.map((img, index) => {
+                  if (
+                    filteredImgs.length < 6 ||
+                    index > filteredImgs.length - 10
+                  )
+                    return <FileRender img={img} key={index} />;
+                })}
+            </ul>
+          </div>
+          <a href="" className="text-center">
+            <h1 className="font-semibold text-md text-blue-600 dark:text-gray-300 transition hover:underline">
+              View shared file...
+            </h1>
+          </a>
+        </div>
+        <div className="grid grid-cols-2 content-center">
+          <a
+            href="#"
+            className="col-span-1 py-4 text-center text-blue-600 dark:text-indigo-500 text-md font-medium border-b-4 border-blue-600 dark:border-indigo-500 flex justify-center group active"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 transition transform-gpu group-hover:scale-110 group-hover:-rotate-6 origin-bottom-right"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+              />
+            </svg>
+            Chat Members
+          </a>
+          <a
+            href="#"
+            className="col-span-1 py-4 text-center text-gray-600 dark:text-gray-300 text-md font-medium border-b-2 flex justify-center group"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 transition transform-gpu group-hover:rotate-180"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            Settings
+          </a>
+        </div>
+      </div>
     );
   }
   //END OF fileHandle section
   /*END OF Component Section*/
   return (
-    <section className="min-h-[89vh] sm:min-h-[90vh] bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
-      <div className="max-h-screen hidden sm:block col-start-1 sm:col-span-4 xl:col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800 z-10">
+    <section className="bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
+      <div className="hidden xl:block col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800">
         <Friends msg={messages} />
       </div>
-      <div className="h-screen sm:col-start-5 col-span-12 sm:col-span-5 xl:col-start-4 xl:col-span-7 flex-col grid grid-rows-6">
-        <div className="row-span-5 ">
-          <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-700 dark:text-gray-200">
-            <h1 className="p-1 text-lg sm:text-3xl xl:p-3 ml-3 truncate">
+      <div className="h-screen col-span-12 lg:col-span-9 xl:col-span-7 grid grid-rows-6">
+        <div className="row-span-5">
+          <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-800 dark:text-gray-200">
+            <div className="xl:hidden flex p-1 text-lg sm:text-3xl xl:p-3 overflow-ellipsis truncate">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 mr-2 cursor-pointer"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                onClick={() => setShowFriendList(!showFriendList)}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h7"
+                />
+              </svg>
+              {
+                <SlideOver
+                  content={<Friends msg={messages} />}
+                  state={showFriendList}
+                  setState={setShowFriendList}
+                />
+              }
               {activeFriendName}
-            </h1>
-            <div className="flex ml-auto mx-6 my-auto space-x-5 text-blue-600 dark:text-indigo-500">
+            </div>
+            <div className="hidden xl:inline p-1 text-lg sm:text-3xl xl:p-3 ml-3 overflow-ellipsis truncate">
+              {activeFriendName}
+            </div>
+            <div className="flex ml-auto mx-2 sm:mx-6 my-auto space-x-3 sm:space-x-5 text-blue-600 dark:text-indigo-500">
               <button>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -379,12 +483,35 @@ function Message() {
                 </svg>
               </button>
             </div>
+            <div className="lg:hidden place-self-end p-1 text-lg sm:text-3xl overflow-ellipsis truncate">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                onClick={()=>setShowFile(!showFile)}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16m-7 6h7"
+                />
+              </svg>
+              {
+                <SlideOver2
+                  content={<File imgs={messages} />}
+                  state={showFile}
+                  setState={setShowFile}
+                />
+              }
+            </div>
           </div>
           <div className="h-5/6 space-y-4 p-1 sm:p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
             <Chat />
           </div>
         </div>
-
         <div className="mb-auto row-start-6">
           <form
             onSubmit={sendMessage}
@@ -439,65 +566,8 @@ function Message() {
           </form>
         </div>
       </div>
-      <div className="max-h-screen hidden sm:block sm:col-start-10 xl:col-start-11 sm:col-span-3 xl:col-span-2 pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800">
-        <div className="mx-3">
-          <div className="overflow-auto">
-            <File imgs={messages} />
-          </div>
-          <a href="" className="text-center">
-            <h1 className="font-semibold text-md text-blue-600 dark:text-gray-300 transition hover:underline">
-              View shared file...
-            </h1>
-          </a>
-        </div>
-        <div className="grid grid-cols-2 content-center">
-          <a
-            href="#"
-            className="col-span-1 py-4 text-center text-blue-600 dark:text-indigo-500 text-md font-medium border-b-4 border-blue-600 dark:border-indigo-500 flex group active"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 xl:ml-2 xl:mr-1 transition transform-gpu group-hover:scale-110 group-hover:-rotate-6 origin-bottom-right"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-              />
-            </svg>
-            Chat Members
-          </a>
-          <a
-            href="#"
-            className="col-span-1 py-4 text-center text-gray-600 dark:text-gray-300 text-md font-medium border-b-2 flex group"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6  sm:ml-6 xl:ml-8 xl:mr-1 transition transform-gpu group-hover:rotate-180 z-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            Settings
-          </a>
-        </div>
+      <div className="hidden lg:block lg:col-span-3 xl:col-span-2 pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800">
+        <File imgs={messages} />{" "}
       </div>
     </section>
   );
