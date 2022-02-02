@@ -32,7 +32,7 @@ export default function Example({ content, state, setState }) {
               leaveFrom="-translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <div className="relative w-screen max-w-xs">
+              <div className="relative w-screen max-w-xs sm:max-w-md">
                 <div className="h-full flex flex-col py-5 bg-gray-50 dark:bg-slate-900 shadow-xl overflow-y-scroll">
                   {content}
                 </div>

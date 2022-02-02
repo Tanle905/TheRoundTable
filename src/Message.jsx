@@ -148,7 +148,8 @@ function Message() {
             </div>
             <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
               <p className="text-xs">
-                {moment(latestMessages).startOf("minute").fromNow()}
+                {filteredMessages.length !== 0 &&
+                  moment(latestMessages).startOf("minute").fromNow()}
               </p>
             </div>
           </div>
@@ -483,31 +484,30 @@ function Message() {
                 </svg>
               </button>
               <div className="lg:hidden place-self-end p-1 text-lg sm:text-3xl overflow-ellipsis truncate">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                onClick={()=>setShowFile(!showFile)}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              </svg>
-              {
-                <SlideOver2
-                  content={<File imgs={messages} />}
-                  state={showFile}
-                  setState={setShowFile}
-                />
-              }
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 cursor-pointer"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  onClick={() => setShowFile(!showFile)}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16m-7 6h7"
+                  />
+                </svg>
+                {
+                  <SlideOver2
+                    content={<File imgs={messages} />}
+                    state={showFile}
+                    setState={setShowFile}
+                  />
+                }
+              </div>
             </div>
-            </div>
-
           </div>
           <div className="h-5/6 space-y-4 p-1 sm:p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
             <Chat />

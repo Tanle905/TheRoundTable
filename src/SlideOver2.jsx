@@ -22,7 +22,7 @@ export default function Example({ content, state, setState }) {
           >
             <Dialog.Overlay className="absolute inset-0 dark:bg-slate-800/75 backdrop-blur-lg transition-opacity" />
           </Transition.Child>
-          <div className="fixed top-10 top-14 inset-y-0 right-0 max-w-full flex">
+          <div className="fixed top-14 inset-y-0 right-0 max-w-full flex">
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-500 sm:duration-700"
@@ -32,8 +32,8 @@ export default function Example({ content, state, setState }) {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <div className="relative w-screen max-w-xs">
-                <div className="h-full flex flex-col py-5 bg-gray-50 dark:bg-slate-900 shadow-xl overflow-y-scroll">
+              <div className="relative w-screen max-w-xs sm:max-w-md">
+                <div className="h-full flex flex-col py-5 bg-gray-50 dark:bg-slate-900 shadow-xl overflow-auto">
                   {content}
                 </div>
               </div>
