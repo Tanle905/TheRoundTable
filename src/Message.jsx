@@ -449,7 +449,7 @@ function Message() {
             <div className="hidden xl:inline p-1 text-lg sm:text-3xl xl:p-3 ml-3 overflow-ellipsis truncate">
               {activeFriendName}
             </div>
-            <div className="flex ml-auto mx-2 sm:mx-6 my-auto space-x-3 sm:space-x-5 text-blue-600 dark:text-indigo-500">
+            <div className="flex  mr-2 sm:mr-6 ml-auto my-auto space-x-3 sm:space-x-5 text-blue-600 dark:text-indigo-500">
               <button>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -482,8 +482,7 @@ function Message() {
                   />
                 </svg>
               </button>
-            </div>
-            <div className="lg:hidden place-self-end p-1 text-lg sm:text-3xl overflow-ellipsis truncate">
+              <div className="lg:hidden place-self-end p-1 text-lg sm:text-3xl overflow-ellipsis truncate">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-8 w-8"
@@ -507,6 +506,8 @@ function Message() {
                 />
               }
             </div>
+            </div>
+
           </div>
           <div className="h-5/6 space-y-4 p-1 sm:p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
             <Chat />
