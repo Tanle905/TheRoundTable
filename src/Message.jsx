@@ -148,7 +148,7 @@ function Message() {
             </div>
             <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
               <p className="text-xs">
-                {filteredMessages.length !== 0 &&
+                {filteredMessages &&
                   moment(latestMessages).startOf("minute").fromNow()}
               </p>
             </div>
