@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
-export default function Example({ content, state, setState }) {
+export default function SlideOver({ content, state, setState }) {
   return (
     <Transition.Root show={state} as={Fragment}>
       <Dialog

@@ -9,6 +9,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import moment from "moment";
 import SlideOver from "./SlideOver";
 import SlideOver2 from "./SlideOver2";
+import GroupForm from "./GroupForm";
 
 function Message() {
   /*Init and Variables Section*/
@@ -51,9 +52,13 @@ function Message() {
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
   /*END OF Init and Variables Section*/
 
+  //Group init and variables
+  const [group, setGroup] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  //End of group init and variables
+
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
-
   useEffect(() => {
     setActiveFriend(
       userFriendsCollectionData != null &&
@@ -215,7 +220,12 @@ function Message() {
           </form>
         </div>
         <ul className="space-y-3 flex flex-col h-screen overflow-auto">
-          <p className="text-gray-800 dark:text-gray-200 p-1 mt-3 mb-0 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl place-self-center">
+          <p
+            className="text-gray-800 dark:text-gray-200 p-1 mt-3 mb-0 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl place-self-center cursor-pointer hover:bg-slate-500 transition"
+            onClick={() => {
+              navigator.clipboard.writeText(auth.currentUser.uid);
+            }}
+          >
             <span className="font-semibold">UID:</span> {auth.currentUser.uid}
           </p>
           {userFriendsCollectionData &&
@@ -408,6 +418,18 @@ function Message() {
             </svg>
             Settings
           </a>
+        </div>
+        <div className="mt-40 h-fit flex place-content-center">
+        <button onClick={() => setGroup(!group)} className="p-3 bg-blue-600 dark:bg-indigo-500 text-gray-800 dark:text-gray-200 rounded-lg font-semibold">Add Group</button>
+          {group && (
+            <GroupForm
+              state={group}
+              setState={setGroup}
+              groupName={groupName}
+              setGroupName={setGroupName}
+              friends={userFriendsCollectionData}
+            />
+          )}
         </div>
       </div>
     );
