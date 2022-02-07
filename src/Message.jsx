@@ -10,6 +10,7 @@ import moment from "moment";
 import SlideOver from "./SlideOver";
 import SlideOver2 from "./SlideOver2";
 import GroupForm from "./GroupForm";
+import { Group } from "./Group";
 
 function Message() {
   /*Init and Variables Section*/
@@ -55,6 +56,10 @@ function Message() {
   //Group init and variables
   const [group, setGroup] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [userGroupsCollectionData] = useCollectionData(
+    firebase.firestore().collection("groups")
+  );
+  console.log(userGroupsCollectionData);
   //End of group init and variables
 
   /*Component Section*/
@@ -163,11 +168,11 @@ function Message() {
     });
     return (
       <div>
-        <div className="p-4 py-1 flex border-b-2 border-gray-200 dark:border-slate-800">
+        <div className="px-4 flex border-b-2 border-gray-200 dark:border-slate-800">
           <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
-            Chats
+            Friends
           </h1>
-          <form className="py-3 my-auto ml-auto sm:mr-5 relative group">
+          <form className="py-3 ml-auto sm:mr-5 relative group">
             <input
               className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 group-hover:w-36 focus:w-36 xl:group-hover:w-56 xl:focus:w-56 focus:border-0 focus:ring-0 form-input"
               type="search"
@@ -219,20 +224,62 @@ function Message() {
             </button>
           </form>
         </div>
-        <ul className="space-y-3 flex flex-col h-screen overflow-auto">
-          <p
-            className="text-gray-800 dark:text-gray-200 p-1 mt-3 mb-0 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl place-self-center cursor-pointer hover:bg-slate-500 transition"
-            onClick={() => {
-              navigator.clipboard.writeText(auth.currentUser.uid);
-            }}
-          >
-            <span className="font-semibold">UID:</span> {auth.currentUser.uid}
-          </p>
-          {userFriendsCollectionData &&
-            userFriendsCollectionData.map((element, index) => (
-              <FriendsList friends={element} key={index} msg={msg} />
-            ))}
-        </ul>
+        <div className="grid grid-rows-3">
+          <ul className="row-span-1 space-y-3 flex flex-col overflow-auto">
+            <p
+              className="text-gray-800 dark:text-gray-200 p-1 mt-3 mb-0 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl place-self-center cursor-pointer hover:bg-slate-500 transition"
+              onClick={() => {
+                navigator.clipboard.writeText(auth.currentUser.uid);
+              }}
+            >
+              <span className="font-semibold">UID:</span> {auth.currentUser.uid}
+            </p>
+            {userFriendsCollectionData &&
+              userFriendsCollectionData.map((element, index) => (
+                <FriendsList friends={element} key={index} msg={msg} />
+              ))}
+          </ul>
+          <div className="row-span-2">
+            <div className="p-4 flex border-y-2 align-middle border-gray-200 dark:border-slate-800">
+              <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
+                Groups
+              </h1>
+            </div>
+            {userGroupsCollectionData &&
+            userGroupsCollectionData.length !== 0 ? (
+              <Group groups={userGroupsCollectionData} />
+            ) : (
+              <div className="flex flex-col place-content-center">
+                <object
+                  data="src\svg\DrawKit Vector Illustration Social Work & Charity (9).svg"
+                  type=""
+                  className="mx-auto w-2/3 h-2/3"
+                ></object>
+                <h1 className="font-semibold text-lg text-gray-800 dark:text-gray-200 text-center">
+                  You do not have any group. Let's create one!!!
+                </h1>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setGroup(!group);
+                  }}
+                  className="m-10 mx-32 p-3 bg-blue-600 dark:bg-indigo-500 text-gray-800 dark:text-gray-200 rounded-lg font-semibold"
+                >
+                  Add Group
+                </button>
+                {group && (
+                  <GroupForm
+                    state={group}
+                    setState={setGroup}
+                    groupName={groupName}
+                    setGroupName={setGroupName}
+                    friends={userFriendsCollectionData}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -418,18 +465,6 @@ function Message() {
             </svg>
             Settings
           </a>
-        </div>
-        <div className="mt-40 h-fit flex place-content-center">
-        <button onClick={() => setGroup(!group)} className="p-3 bg-blue-600 dark:bg-indigo-500 text-gray-800 dark:text-gray-200 rounded-lg font-semibold">Add Group</button>
-          {group && (
-            <GroupForm
-              state={group}
-              setState={setGroup}
-              groupName={groupName}
-              setGroupName={setGroupName}
-              friends={userFriendsCollectionData}
-            />
-          )}
         </div>
       </div>
     );
