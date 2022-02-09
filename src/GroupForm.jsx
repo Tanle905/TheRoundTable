@@ -40,7 +40,7 @@ export default function GroupForm({
         >
           <Dialog.Overlay className="fixed inset-0 bg-gray-200/20" />
         </Transition.Child>
-        <div className="fixed max-w-xs h-10 inset-x-52 inset-y-52">
+        <div className="fixed max-w-xs h-fit inset-x-10 sm:inset-x-52 inset-y-52">
           <form onSubmit={(e) => addGroup(e, groupName, setGroupName, selectedFriends)}>
             <Transition.Child
               as={Fragment}

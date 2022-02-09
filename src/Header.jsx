@@ -2,9 +2,11 @@ import Dropdown from "./Dropdown";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 function Header() {
   const auth = firebase.auth();
+  const [user] = useAuthState(auth)
 
   return (
     <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
@@ -79,7 +81,7 @@ function Header() {
                   <a className="block ml-5 sm:ml-0 p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500">
                     <img
                       className="max-w-full max-h-12 rounded-full cursor-pointer object-cover"
-                      src={auth.currentUser.photoURL}
+                      src={user && user.photoURL}
                       alt=""
                     />
                   </a>

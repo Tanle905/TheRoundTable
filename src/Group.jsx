@@ -2,6 +2,11 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import GroupForm from "./GroupForm";
 import { useState } from "react";
+import firstTimeGroupImg from "./svg/groupImg.svg";
+import {
+  useCollection,
+  useCollectionData,
+} from "react-firebase-hooks/firestore";
 
 firebase.initializeApp({
   apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
@@ -13,6 +18,7 @@ firebase.initializeApp({
   measurementId: "G-3NRE8RWMTD",
 });
 
+const userRef = firebase.firestore().collection("users");
 const groupRef = firebase.firestore().collection("groups");
 const addGroup = (e, groupName, setGroupName, selectedFriends) => {
   e.preventDefault();
@@ -22,14 +28,33 @@ const addGroup = (e, groupName, setGroupName, selectedFriends) => {
     name: groupName,
     members: [...selectedFriends, firebase.auth().currentUser.uid],
   });
+  selectedFriends.map((selectedFriend) => {
+    userRef.doc(selectedFriend).collection("groups").doc(groupId).set({
+      name: groupId,
+    });
+  });
+  userRef
+    .doc(firebase.auth().currentUser.uid)
+    .collection("groups")
+    .doc(groupId)
+    .set({
+      name: groupId,
+    });
   setGroupName("");
 };
-function Group({ groups, setGroupId, friends, setActive }) {
+function Group({ groups, setGroupId, friends, setActive, setActiveName }) {
   const [showGroupForm, setShowGroupForm] = useState(false);
-  const [groupName, setGroupName] = useState(null);
+  const [groupName, setGroupName] = useState("");
+  const [userGroupCollectionData] = useCollectionData(
+    userRef.doc(firebase.auth().currentUser.uid).collection("groups")
+  );
+
   return (
     <div>
-      {groups && groups.length !== 0 ? (
+      {groups &&
+      groups.length !== 0 &&
+      userGroupCollectionData &&
+      userGroupCollectionData.length !== 0 ? (
         <ul>
           {groups &&
             groups.map((group, index) => {
@@ -38,10 +63,11 @@ function Group({ groups, setGroupId, friends, setActive }) {
                   <li key={index} className="">
                     <div className="m-3 flex-col text-gray-800 dark:text-gray-300">
                       <h1
-                        className="font-medium text-lg sm:text-xl cursor-pointer"
+                        className="cursor-pointer text-lg font-medium sm:text-xl"
                         onClick={() => {
                           setActive(group.groupId);
                           setGroupId(group.groupId);
+                          setActiveName(group.name);
                         }}
                       >
                         {group.name}
@@ -53,12 +79,8 @@ function Group({ groups, setGroupId, friends, setActive }) {
         </ul>
       ) : (
         <div className="flex flex-col place-content-center">
-          <object
-            data="src\svg\DrawKit Vector Illustration Social Work & Charity (9).svg"
-            type=""
-            className="mx-auto w-2/3 h-2/3"
-          ></object>
-          <h1 className="font-semibold text-lg text-gray-800 dark:text-gray-200 text-center">
+          <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
+          <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
             You do not have any group. Let's create one!!!
           </h1>
           <button
@@ -66,7 +88,7 @@ function Group({ groups, setGroupId, friends, setActive }) {
               e.preventDefault();
               setShowGroupForm(!showGroupForm);
             }}
-            className="m-10 sm:mx-32 p-3 bg-blue-600 dark:bg-indigo-500 text-gray-100 rounded-lg font-semibold hover:-translate-y-1 hover:bg-blue-500 dark:hover:bg-indigo-400 hover:text-white transition"
+            className="m-10 rounded-lg bg-blue-600 p-3 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
           >
             Add Group
           </button>
