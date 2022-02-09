@@ -12,7 +12,7 @@ import SlideOver2 from "./SlideOver2";
 import GroupForm from "./GroupForm";
 import { Group } from "./Group";
 
-function Message() {
+const Message = React.memo(() => {
   /*Init and Variables Section*/
   //Firebase init
   const firebaseApp = firebase.initializeApp({
@@ -54,12 +54,11 @@ function Message() {
   /*END OF Init and Variables Section*/
 
   //Group init and variables
-  const [group, setGroup] = useState(false);
+  const groupRef = firebase.firestore().collection("groups");
+  const [showGroupForm, setShowGroupForm] = useState(false);
   const [groupName, setGroupName] = useState("");
-  const [userGroupsCollectionData] = useCollectionData(
-    firebase.firestore().collection("groups")
-  );
-  console.log(userGroupsCollectionData);
+  const [groupId, setGroupId] = useState("");
+  const [groupsCollectionData] = useCollectionData(groupRef);
   //End of group init and variables
 
   /*Component Section*/
@@ -106,6 +105,7 @@ function Message() {
       const friendRefHandle = () => {
         setActiveFriend(friendUid);
         setActiveFriendName(friendName);
+        setGroupId(null);
       };
 
       const filteredMessages =
@@ -130,15 +130,15 @@ function Message() {
           className={`group transition ${friendClass} `}
           onClick={friendRefHandle}
         >
-          <div className="p-3 space-x-2 grid grid-cols-6 rounded-lg transition-all focus:bg-gray-200 hover:cursor-pointer">
+          <div className="grid grid-cols-10 space-x-2 rounded-lg p-2 transition-all hover:cursor-pointer focus:bg-gray-200">
             <img
-              className="w-16 max-h-16 rounded-full transition group-hover:ring-4 ring-blue-500 dark:ring-indigo-400"
+              className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
               src={friendphotoURL}
               alt=""
             />
-            <div className="flex-col truncate col-span-4 text-gray-800 dark:text-gray-300">
-              <h1 className="font-medium text-lg sm:text-xl">{friendName}</h1>
-              <p className="truncate flex">
+            <div className="col-span-7 flex-col truncate text-gray-800 dark:text-gray-300">
+              <h1 className="text-sm font-medium sm:text-lg">{friendName}</h1>
+              <p className="flex truncate text-xs">
                 <span className="mr-2">
                   {filteredMessages && filteredMessages.length !== 0
                     ? filteredMessages[filteredMessages.length - 1].uid ===
@@ -156,9 +156,10 @@ function Message() {
                     "đã gửi 1 ảnh"}
               </p>
             </div>
-            <div className="col-span-1 mr-auto dark:text-gray-200 text-gray-700">
+            <div className="col-span-2 mr-auto text-gray-700 dark:text-gray-200">
               <p className="text-xs">
                 {filteredMessages &&
+                  filteredMessages.length !== 0 &&
                   moment(latestMessages).startOf("minute").fromNow()}
               </p>
             </div>
@@ -168,19 +169,19 @@ function Message() {
     });
     return (
       <div>
-        <div className="px-4 flex border-b-2 border-gray-200 dark:border-slate-800">
-          <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
+        <div className="flex border-b-2 border-gray-200 px-4 dark:border-slate-800">
+          <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200">
             Friends
           </h1>
-          <form className="py-3 ml-auto sm:mr-5 relative group">
+          <form className="group relative ml-auto py-3 sm:mr-2">
             <input
-              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 group-hover:w-36 focus:w-36 xl:group-hover:w-56 xl:focus:w-56 focus:border-0 focus:ring-0 form-input"
+              className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
               type="search"
               name="search"
-              placeholder="Search for Friends..."
+              placeholder="Find a Friends..."
               autoFocus={false}
             />
-            <button className="absolute right-2 top-0 mt-5 text-gray-600 dark:text-gray-50 transition-all hover:text-gray-800 dark:hover:text-gray-300">
+            <button className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -197,16 +198,16 @@ function Message() {
               </svg>
             </button>
           </form>
-          <form className="py-3 my-auto relative group" onSubmit={addfriend}>
+          <form className="group relative my-auto py-3" onSubmit={addfriend}>
             <input
-              className="h-10 pr-10 w-10 ml-2 bg-gray-50 group-hover:bg-gray-200 dark:group-hover:bg-slate-800 dark:bg-slate-900 dark:placeholder:text-slate-400 dark:text-gray-50 rounded-md border-0 font-semibold transform duration-200 group-hover:w-36 focus:w-36 xl:group-hover:w-56 xl:focus:w-56 focus:border-0 focus:ring-0 form-input"
+              className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 xl:focus:w-44 xl:group-hover:w-44"
               type="text"
               placeholder="Add a Friend UID"
               value={uidValue}
               onChange={(e) => setUidValue(e.target.value)}
             />
             <button
-              className="absolute right-2 top-0 mt-5 text-gray-600 dark:text-gray-50 transition-all group-hover:rotate-180"
+              className="absolute right-2 top-0 mt-5 text-gray-600 transition-all group-hover:rotate-180 dark:text-gray-50"
               type="submit"
             >
               <svg
@@ -225,9 +226,9 @@ function Message() {
           </form>
         </div>
         <div className="grid grid-rows-3">
-          <ul className="row-span-1 space-y-3 flex flex-col overflow-auto">
+          <ul className="row-span-1 flex min-h-[40vh] flex-col overflow-auto">
             <p
-              className="text-gray-800 dark:text-gray-200 p-1 mt-3 mb-0 my-auto bg-blue-200 dark:bg-slate-700 rounded-xl place-self-center cursor-pointer hover:bg-slate-500 transition"
+              className="my-1 cursor-pointer place-self-center rounded-xl bg-blue-200 p-1 text-gray-800 transition hover:bg-slate-500 dark:bg-slate-700 dark:text-gray-200"
               onClick={() => {
                 navigator.clipboard.writeText(auth.currentUser.uid);
               }}
@@ -239,45 +240,51 @@ function Message() {
                 <FriendsList friends={element} key={index} msg={msg} />
               ))}
           </ul>
-          <div className="row-span-2">
-            <div className="p-4 flex border-y-2 align-middle border-gray-200 dark:border-slate-800">
-              <h1 className="font-bold my-auto text-gray-800 dark:text-gray-200 text-2xl">
+          <div className="row-span-2 max-w-xs sm:max-w-none">
+            <div className=" relative flex border-y-2 border-gray-200 py-2 px-4 align-middle dark:border-slate-800">
+              <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200">
                 Groups
               </h1>
-            </div>
-            {userGroupsCollectionData &&
-            userGroupsCollectionData.length !== 0 ? (
-              <Group groups={userGroupsCollectionData} />
-            ) : (
-              <div className="flex flex-col place-content-center">
-                <object
-                  data="src\svg\DrawKit Vector Illustration Social Work & Charity (9).svg"
-                  type=""
-                  className="mx-auto w-2/3 h-2/3"
-                ></object>
-                <h1 className="font-semibold text-lg text-gray-800 dark:text-gray-200 text-center">
-                  You do not have any group. Let's create one!!!
-                </h1>
+              {groupsCollectionData && groupsCollectionData.length !== 0 ? (
                 <button
+                  className="absolute right-2 my-auto text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
                   onClick={(e) => {
                     e.preventDefault();
-                    setGroup(!group);
+                    setShowGroupForm(!showGroupForm);
                   }}
-                  className="m-10 mx-32 p-3 bg-blue-600 dark:bg-indigo-500 text-gray-800 dark:text-gray-200 rounded-lg font-semibold"
                 >
-                  Add Group
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {showGroupForm && (
+                    <GroupForm
+                      state={showGroupForm}
+                      setState={setShowGroupForm}
+                      groupName={groupName}
+                      setGroupName={setGroupName}
+                      friends={userFriendsCollectionData}
+                    />
+                  )}
                 </button>
-                {group && (
-                  <GroupForm
-                    state={group}
-                    setState={setGroup}
-                    groupName={groupName}
-                    setGroupName={setGroupName}
-                    friends={userFriendsCollectionData}
-                  />
-                )}
-              </div>
-            )}
+              ) : (
+                ""
+              )}
+            </div>
+            <Group
+              groups={groupsCollectionData}
+              friends={userFriendsCollectionData}
+              setActive={setActiveFriend}
+              setGroupId={setGroupId}
+            />
           </div>
         </div>
       </div>
@@ -296,17 +303,18 @@ function Message() {
         moment(createdAt.toDate()).locale("vi").format("lll");
       if (
         (activeFriend === sendTo && auth.currentUser.uid === sentFrom) ||
-        (activeFriend === sentFrom && auth.currentUser.uid === sendTo)
+        (activeFriend === sentFrom && auth.currentUser.uid === sendTo) ||
+        groupId === sendTo
       ) {
         return (
           <div className={`flex space-x-2 space-y-2 ${messageClass}`}>
             <img
-              className={`mb-1 rounded-full w-6 h-6 mt-auto ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
+              className={`mb-1 mt-auto h-6 w-6 rounded-full ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
               src={photoURL}
               alt=""
             />
             {text ? (
-              <p className="max-w-[15rem] sm:max-w-xl break-words whitespace-normal bg-blue-500 dark:bg-indigo-500 p-2 py-1 rounded-xl">
+              <p className="max-w-[15rem] whitespace-normal break-words rounded-xl bg-blue-500 p-2 py-1 dark:bg-indigo-500 sm:max-w-xl">
                 {text}
               </p>
             ) : (
@@ -315,11 +323,11 @@ function Message() {
             {image && (
               <img
                 src={image}
-                className="w-60 sm:w-auto max-w-xs xl:max-w-full max-h-96 sm:max-h-80 rounded-xl"
+                className="max-h-96 w-60 max-w-xs rounded-xl sm:max-h-80 sm:w-auto xl:max-w-full"
                 alt=""
               />
             )}
-            <p className="text-xs sm:text-sm font-thin text-gray-800 dark:text-gray-400 self-center">
+            <p className="self-center text-xs font-thin text-gray-800 dark:text-gray-400 sm:text-sm">
               {date}
             </p>
           </div>
@@ -328,7 +336,7 @@ function Message() {
     }
 
     return (
-      <div className="px-1 xl:px-4 pb-2 text-gray-200 dark:text-gray-200 text-lg">
+      <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
         {messages &&
           messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
       </div>
@@ -389,7 +397,7 @@ function Message() {
             onClick={() => window.open(img.image, img.image).focus()}
           >
             <img
-              className="rounded-md max-w-md h-56 sm:h-28 object-cover transition hover:-translate-y-1"
+              className="h-56 max-w-md rounded-md object-cover transition hover:-translate-y-1 sm:h-28"
               src={img.image}
               alt=""
             />
@@ -401,7 +409,7 @@ function Message() {
       <div>
         <div className="mx-3">
           <div className="overflow-auto">
-            <ul className="max-h-60 sm:max-h-32 flex flex-row-reverse justify-end py-2">
+            <ul className="flex max-h-60 flex-row-reverse justify-end py-2 sm:max-h-32">
               {imgs &&
                 filteredImgs.map((img, index) => {
                   if (
@@ -413,7 +421,7 @@ function Message() {
             </ul>
           </div>
           <a href="" className="text-center">
-            <h1 className="font-semibold text-md text-blue-600 dark:text-gray-300 transition hover:underline">
+            <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
               View shared file...
             </h1>
           </a>
@@ -421,11 +429,11 @@ function Message() {
         <div className="grid grid-cols-2 content-center">
           <a
             href="#"
-            className="col-span-1 py-4 text-center text-blue-600 dark:text-indigo-500 text-md font-medium border-b-4 border-blue-600 dark:border-indigo-500 flex justify-center group active"
+            className="text-md group active col-span-1 flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 transition transform-gpu group-hover:scale-110 group-hover:-rotate-6 origin-bottom-right"
+              className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -441,11 +449,11 @@ function Message() {
           </a>
           <a
             href="#"
-            className="col-span-1 py-4 text-center text-gray-600 dark:text-gray-300 text-md font-medium border-b-2 flex justify-center group"
+            className="text-md group col-span-1 flex justify-center border-b-2 py-4 text-center font-medium text-gray-600 dark:text-gray-300"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 transition transform-gpu group-hover:rotate-180"
+              className="h-6 w-6 transform-gpu transition group-hover:rotate-180"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -472,17 +480,17 @@ function Message() {
   //END OF fileHandle section
   /*END OF Component Section*/
   return (
-    <section className="bg-gray-50 dark:bg-slate-900 grid grid-cols-12">
-      <div className="hidden xl:block col-span-3 shadow-md shadow-gray-500 dark:shadow-slate-800">
+    <section className="grid grid-cols-12 bg-gray-50 dark:bg-slate-900">
+      <div className="col-span-3 hidden shadow-md shadow-gray-500 dark:shadow-slate-800 xl:block">
         <Friends msg={messages} />
       </div>
-      <div className="h-screen col-span-12 lg:col-span-9 xl:col-span-7 grid grid-rows-6">
+      <div className="col-span-12 grid h-screen grid-rows-6 lg:col-span-9 xl:col-span-7">
         <div className="row-span-5">
-          <div className="flex py-1.5 bg-gradient-to-r from-blue-300 to-blue-50 dark:from-indigo-800 dark:to-transparent font-medium text-2xl sm:text-3xl text-gray-800 dark:text-gray-200">
-            <div className="xl:hidden flex p-1 text-lg sm:text-3xl xl:p-3 overflow-ellipsis truncate">
+          <div className="flex bg-gradient-to-r from-blue-300 to-blue-50 py-1.5 text-2xl font-medium text-gray-800 dark:from-indigo-800 dark:to-transparent dark:text-gray-200 sm:text-3xl">
+            <div className="flex truncate overflow-ellipsis p-1 text-lg sm:text-3xl xl:hidden xl:p-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 mr-2 cursor-pointer"
+                className="mr-2 h-8 w-8 cursor-pointer"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -504,14 +512,14 @@ function Message() {
               }
               {activeFriendName}
             </div>
-            <div className="hidden xl:inline p-1 text-lg sm:text-3xl xl:p-3 ml-3 overflow-ellipsis truncate">
+            <div className="ml-3 hidden truncate overflow-ellipsis p-1 text-lg sm:text-3xl xl:inline xl:p-3">
               {activeFriendName}
             </div>
-            <div className="flex  mr-2 sm:mr-6 ml-auto my-auto space-x-3 sm:space-x-5 text-blue-600 dark:text-indigo-500">
+            <div className="my-auto  mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
               <button>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-7 sm:h-8 w-7 sm:w-8 transition hover:-translate-y-1"
+                  className="h-7 w-7 transition hover:-translate-y-1 sm:h-8 sm:w-8"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -540,7 +548,7 @@ function Message() {
                   />
                 </svg>
               </button>
-              <div className="lg:hidden place-self-end p-1 text-lg sm:text-3xl overflow-ellipsis truncate">
+              <div className="place-self-end truncate overflow-ellipsis p-1 text-lg sm:text-3xl lg:hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 cursor-pointer"
@@ -566,11 +574,11 @@ function Message() {
               </div>
             </div>
           </div>
-          <div className="h-5/6 space-y-4 p-1 sm:p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-5/6 space-y-4 overflow-y-auto p-1 sm:p-3">
             <Chat />
           </div>
         </div>
-        <div className="mb-auto row-start-6">
+        <div className="row-start-6 mb-auto">
           <form
             onSubmit={sendMessage}
             className="flex justify-center sm:px-3 xl:px-0"
@@ -582,7 +590,7 @@ function Message() {
               onChange={fileHandle}
             />
             <label
-              className="text-gray-600 dark:text-gray-400 my-auto mx-1 sm:mr-4 transition hover:rotate-12 cursor-pointer"
+              className="my-auto mx-1 cursor-pointer text-gray-600 transition hover:rotate-12 dark:text-gray-400 sm:mr-4"
               htmlFor="selectedFile"
             >
               <svg
@@ -601,7 +609,7 @@ function Message() {
               </svg>
             </label>
             <input
-              className="w-5/6 rounded-full dark:bg-slate-900 border-gray-300 dark:border-indigo-500 dark:text-gray-200 focus:ring-0 focus:border-gray-300"
+              className="w-5/6 rounded-full border-gray-300 focus:border-gray-300 focus:ring-0 dark:border-indigo-500 dark:bg-slate-900 dark:text-gray-200"
               type="text"
               placeholder="Type messages here..."
               value={messageValue}
@@ -609,7 +617,7 @@ function Message() {
             />
             <button
               href=""
-              className="text-blue-600 dark:text-indigo-500 my-auto mx-1 sm:ml-4 rotate-90 transition hover:rotate-0 "
+              className="my-auto mx-1 rotate-90 text-blue-600 transition hover:rotate-0 dark:text-indigo-500 sm:ml-4 "
               type="summit"
             >
               <svg
@@ -624,11 +632,10 @@ function Message() {
           </form>
         </div>
       </div>
-      <div className="hidden lg:block lg:col-span-3 xl:col-span-2 pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800">
+      <div className="hidden pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800 lg:col-span-3 lg:block xl:col-span-2">
         <File imgs={messages} />{" "}
       </div>
     </section>
   );
-}
-
+});
 export default Message;
