@@ -508,8 +508,8 @@ const Message = React.memo(() => {
       </div>
       <div className="col-span-12 grid h-screen grid-rows-6 lg:col-span-9 xl:col-span-7">
         <div className="row-span-5">
-          <div className="flex h-10 bg-gradient-to-r from-blue-300 to-blue-50 text-2xl font-medium text-gray-800 dark:from-indigo-800 dark:to-transparent dark:text-gray-200 sm:h-16 sm:text-3xl">
-            <div className="flex truncate overflow-ellipsis p-1 text-lg sm:text-3xl xl:hidden xl:p-3">
+          <div className="flex h-10 bg-gradient-to-r from-blue-300 to-blue-50 text-2xl font-medium text-gray-800 dark:from-indigo-800 dark:to-transparent dark:text-gray-200 xl:h-16 xl:text-3xl">
+            <div className="flex truncate overflow-ellipsis p-1 text-lg xl:hidden xl:p-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="mr-2 h-8 w-8 cursor-pointer"
