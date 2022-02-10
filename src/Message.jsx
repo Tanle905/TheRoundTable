@@ -11,8 +11,8 @@ import SlideOver from "./SlideOver";
 import SlideOver2 from "./SlideOver2";
 import GroupForm from "./GroupForm";
 import { Group } from "./Group";
-import friendSvg from "./svg/teammeeting.svg";
-import firstTimeGroupImg from "./svg/groupImg.svg";
+import firstTimeGroupImg from "./svg/teammeeting.svg";
+import friendSvg from "./svg/groupImg.svg";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -62,7 +62,7 @@ const Message = React.memo(() => {
   const [groupName, setGroupName] = useState("");
   const [groupId, setGroupId] = useState("");
   const [groupsCollectionData] = useCollectionData(groupRef);
-  const [userGroupCollectionData] = useCollectionData(
+  const [userGroupCollectionData, userGroupCollectionDataIsLoading] = useCollectionData(
     userRef.doc(firebase.auth().currentUser.uid).collection("groups")
   );
   //End of group init and variables
@@ -144,13 +144,13 @@ const Message = React.memo(() => {
             />
             <div className="col-span-7 flex-col truncate text-gray-800 dark:text-gray-300">
               <h1 className="text-sm font-medium sm:text-lg">{friendName}</h1>
-              <p className="flex truncate text-xs">
-                <span className="mr-2">
+              <p className="flex text-xs">
+                <span className="mr-2 ">
                   {filteredMessages && filteredMessages.length !== 0
                     ? filteredMessages[filteredMessages.length - 1].uid ===
                       friendUid
                       ? ""
-                      : "Bạn:"
+                      : "You:"
                     : ""}
                 </span>
                 {filteredMessages &&
@@ -159,11 +159,11 @@ const Message = React.memo(() => {
                   ? filteredMessages[filteredMessages.length - 1].text
                   : filteredMessages &&
                     filteredMessages.length !== 0 &&
-                    "đã gửi 1 ảnh"}
+                    "sent an image"}
               </p>
             </div>
             <div className="col-span-2 mr-auto text-gray-700 dark:text-gray-200">
-              <p className="text-xs">
+              <p className="line-clamp-2 text-xs">
                 {filteredMessages &&
                   filteredMessages.length !== 0 &&
                   moment(latestMessages).startOf("minute").fromNow()}
@@ -176,7 +176,7 @@ const Message = React.memo(() => {
     return (
       <div>
         <div className="grid grid-rows-3">
-          <ul className="sm:min-h[40vh] row-span-1 flex h-[30vh] flex-col overflow-auto">
+          <ul className="row-span-1 flex h-[33vh] flex-col overflow-auto">
             <p
               className="my-1 cursor-pointer place-self-center rounded-xl bg-blue-200 p-1 text-gray-800 transition hover:bg-slate-500 dark:bg-slate-700 dark:text-gray-200"
               onClick={() => {
@@ -245,38 +245,38 @@ const Message = React.memo(() => {
                 ""
               )}
             </div>
-            {userGroupCollectionData && userGroupCollectionData.length !== 0 ?
-            <Group
-              groups={groupsCollectionData}
-              setActive={setActiveFriend}
-              setGroupId={setGroupId}
-              setActiveName={setActiveName}
-            />
-            : (
-            <div className="flex flex-col place-content-center">
-              <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
-              <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
-                You do not have any group. Let's create one!!!
-              </h1>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowGroupForm(!showGroupForm);
-                }}
-                className="m-10 rounded-lg bg-blue-600 p-3 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
-              >
-                Add Group
-              </button>
-              {showGroupForm && (
-                <GroupForm
-                  state={showGroupForm}
-                  setState={setShowGroupForm}
-                  groupName={groupName}
-                  setGroupName={setGroupName}
-                  friends={userFriendsCollectionData}
-                />
-              )}
-            </div>
+            {userGroupCollectionData && userGroupCollectionData.length !== 0 ? (
+              <Group
+                groups={groupsCollectionData}
+                setActive={setActiveFriend}
+                setGroupId={setGroupId}
+                setActiveName={setActiveName}
+              />
+            ) : (
+              <div className="flex flex-col place-content-center">
+                <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
+                <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  You do not have any group. Let's create one!!!
+                </h1>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowGroupForm(!showGroupForm);
+                  }}
+                  className="m-10 rounded-lg bg-blue-600 p-3 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
+                >
+                  Add Group
+                </button>
+                {showGroupForm && (
+                  <GroupForm
+                    state={showGroupForm}
+                    setState={setShowGroupForm}
+                    groupName={groupName}
+                    setGroupName={setGroupName}
+                    friends={userFriendsCollectionData}
+                  />
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -401,75 +401,13 @@ const Message = React.memo(() => {
       );
     }
     return (
-      <div>
-        <div className="mx-3">
-          <div className="overflow-auto">
-            <ul className="flex max-h-60 flex-row-reverse justify-end py-2 sm:max-h-32">
-              {imgs &&
-                filteredImgs.map((img, index) => {
-                  if (
-                    filteredImgs.length < 6 ||
-                    index > filteredImgs.length - 10
-                  )
-                    return <FileRender img={img} key={index} />;
-                })}
-            </ul>
-          </div>
-          <a href="#" className="text-center">
-            <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
-              View shared file...
-            </h1>
-          </a>
-        </div>
-        <div className="grid grid-cols-2 content-center">
-          <a
-            href="#"
-            className="text-md group active col-span-1 flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-              />
-            </svg>
-            Chat Members
-          </a>
-          <a
-            href="#"
-            className="text-md group col-span-1 flex justify-center border-b-2 py-4 text-center font-medium text-gray-600 dark:text-gray-300"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 transform-gpu transition group-hover:rotate-180"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            Settings
-          </a>
-        </div>
-      </div>
+      <ul className="flex max-h-60 flex-row-reverse justify-end py-2 sm:max-h-32">
+        {imgs &&
+          filteredImgs.map((img, index) => {
+            if (filteredImgs.length < 6 || index > filteredImgs.length - 10)
+              return <FileRender img={img} key={index} />;
+          })}
+      </ul>
     );
   }
   //END OF fileHandle section
@@ -680,7 +618,68 @@ const Message = React.memo(() => {
                 </svg>
                 {
                   <SlideOver2
-                    content={<File imgs={messages} />}
+                    content={
+                      <div>
+                        <div className="mx-3">
+                          <div className="overflow-auto">
+                            <File imgs={messages} />
+                          </div>
+                          <a href="#" className="text-center">
+                            <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
+                              View shared file...
+                            </h1>
+                          </a>
+                        </div>
+                        <div className="grid grid-cols-2 content-center">
+                          <a
+                            href="#"
+                            className="text-md group active col-span-1 flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                              />
+                            </svg>
+                            Chat Members
+                          </a>
+                          <a
+                            href="#"
+                            className="text-md group col-span-1 flex justify-center border-b-2 py-4 text-center font-medium text-gray-600 dark:text-gray-300"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-6 w-6 transform-gpu transition group-hover:rotate-180"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                            Settings
+                          </a>
+                        </div>
+                      </div>
+                    }
                     state={showFile}
                     setState={setShowFile}
                   />
@@ -692,7 +691,7 @@ const Message = React.memo(() => {
             <Chat />
           </div>
         </div>
-        <div className="row-start-6 mb-auto">
+        {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && <div className="row-start-6 mb-auto">
           <form
             onSubmit={sendMessage}
             className="flex justify-center sm:px-3 xl:px-0"
@@ -744,10 +743,68 @@ const Message = React.memo(() => {
               </svg>
             </button>
           </form>
-        </div>
+        </div>}
       </div>
       <div className="hidden pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800 lg:col-span-3 lg:block xl:col-span-2">
-        <File imgs={messages} />
+        <div className="mx-3">
+          <div className="overflow-auto">
+            <File imgs={messages} />
+          </div>
+          <a href="#" className="text-center">
+            <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
+              View shared file...
+            </h1>
+          </a>
+        </div>
+        <div className="grid grid-cols-2 content-center">
+          <a
+            href="#"
+            className="text-md group active col-span-1 flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+              />
+            </svg>
+            Chat Members
+          </a>
+          <a
+            href="#"
+            className="text-md group col-span-1 flex justify-center border-b-2 py-4 text-center font-medium text-gray-600 dark:text-gray-300"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 transform-gpu transition group-hover:rotate-180"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            Settings
+          </a>
+        </div>
+        <div>{}</div>
       </div>
     </section>
   );

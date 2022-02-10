@@ -17,28 +17,27 @@ code {
 
 @layer components {
   .friend-inactive {
-    @apply dark:hover:bg-slate-800 hover:bg-gray-100;
+    @apply transition hover:bg-gray-100 dark:hover:bg-slate-800;
   }
   .friend-active {
-    @apply bg-gradient-to-r dark:bg-gradient-to-r from-blue-300 dark:from-indigo-700 to-transparent dark:to-transparent;
+    @apply bg-gradient-to-r from-blue-300 to-transparent transition dark:bg-gradient-to-r dark:from-indigo-700 dark:to-transparent;
   }
   .sent {
-    @apply justify-start flex-row-reverse;
+    @apply flex-row-reverse justify-start transition;
   }
   .received {
-    @apply justify-start;
+    @apply justify-start transition;
   }
   .sent img {
-    @apply ml-2 mr-0;
+    @apply ml-2 mr-0 transition;
   }
   ::-webkit-scrollbar {
-    @apply w-1 h-2 bg-gray-200 dark:bg-slate-800
-    
+    @apply h-2 w-1 bg-gray-200 dark:bg-slate-800;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-gray-200 dark:bg-slate-800 rounded-sm
+    @apply rounded-sm bg-gray-200 dark:bg-slate-800;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-blue-400/60 dark:bg-indigo-600/50 rounded-sm
+    @apply rounded-sm bg-blue-400/60 dark:bg-indigo-600/50;
   }
 }
