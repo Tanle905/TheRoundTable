@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Fragment } from "react/cjs/react.production.min";
 import { addGroup } from "./Group";
 
@@ -18,7 +18,6 @@ export default function GroupForm({
         )
       : setSelectedFriends([...selectedFriends, friend.friendUid]);
   };
-  console.log(selectedFriends);
 
   return (
     <Transition show={state} as={Fragment}>

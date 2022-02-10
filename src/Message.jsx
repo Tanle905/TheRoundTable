@@ -12,6 +12,7 @@ import SlideOver2 from "./SlideOver2";
 import GroupForm from "./GroupForm";
 import { Group } from "./Group";
 import friendSvg from "./svg/teammeeting.svg";
+import firstTimeGroupImg from "./svg/groupImg.svg";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -244,13 +245,39 @@ const Message = React.memo(() => {
                 ""
               )}
             </div>
+            {userGroupCollectionData && userGroupCollectionData.length !== 0 ?
             <Group
               groups={groupsCollectionData}
-              friends={userFriendsCollectionData}
               setActive={setActiveFriend}
               setGroupId={setGroupId}
               setActiveName={setActiveName}
             />
+            : (
+            <div className="flex flex-col place-content-center">
+              <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
+              <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
+                You do not have any group. Let's create one!!!
+              </h1>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowGroupForm(!showGroupForm);
+                }}
+                className="m-10 rounded-lg bg-blue-600 p-3 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
+              >
+                Add Group
+              </button>
+              {showGroupForm && (
+                <GroupForm
+                  state={showGroupForm}
+                  setState={setShowGroupForm}
+                  groupName={groupName}
+                  setGroupName={setGroupName}
+                  friends={userFriendsCollectionData}
+                />
+              )}
+            </div>
+            )}
           </div>
         </div>
       </div>
@@ -351,7 +378,9 @@ const Message = React.memo(() => {
         if (
           (activeFriend === img.sendTo &&
             auth.currentUser.uid === img.sentFrom) ||
-          (activeFriend === img.sentFrom && auth.currentUser.uid === img.sendTo)
+          (activeFriend === img.sentFrom &&
+            auth.currentUser.uid === img.sendTo) ||
+          groupId === img.sendTo
         )
           return img.image;
       });
@@ -386,7 +415,7 @@ const Message = React.memo(() => {
                 })}
             </ul>
           </div>
-          <a href="" className="text-center">
+          <a href="#" className="text-center">
             <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
               View shared file...
             </h1>
@@ -718,7 +747,7 @@ const Message = React.memo(() => {
         </div>
       </div>
       <div className="hidden pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800 lg:col-span-3 lg:block xl:col-span-2">
-        <File imgs={messages} />{" "}
+        <File imgs={messages} />
       </div>
     </section>
   );
