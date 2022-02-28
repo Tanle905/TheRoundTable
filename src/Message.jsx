@@ -653,7 +653,7 @@ const Message = React.memo(() => {
                                 d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
                               />
                             </svg>
-                            Chat Members
+                            Members
                           </a>
                           <a
                             href="#"
@@ -682,6 +682,29 @@ const Message = React.memo(() => {
                             Settings
                           </a>
                         </div>
+                        <ul className="mt-3 space-y-2 overflow-auto">
+                          {groupsCollectionData?.map((group) => {
+                            return (
+                              group?.groupId === groupId &&
+                              group.friendsData.map((friendData, index) => {
+                                return (
+                                  <li
+                                    key={index}
+                                    className="group flex cursor-default truncate p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
+                                  >
+                                    <img
+                                      src={friendData.friendphotoURL}
+                                      className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
+                                    />
+                                    <h1 className="ml-2 text-sm font-medium sm:text-lg">
+                                      {friendData.friendName}
+                                    </h1>
+                                  </li>
+                                );
+                              })
+                            );
+                          })}
+                        </ul>
                       </div>
                     }
                     state={showFile}
@@ -818,7 +841,7 @@ const Message = React.memo(() => {
                 return (
                   <li
                     key={index}
-                    className="group flex truncate p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800 cursor-default"
+                    className="group flex cursor-default truncate p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
                   >
                     <img
                       src={friendData.friendphotoURL}
