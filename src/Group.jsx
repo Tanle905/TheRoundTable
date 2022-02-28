@@ -12,29 +12,35 @@ firebase.initializeApp({
 
 const userRef = firebase.firestore().collection("users");
 const groupRef = firebase.firestore().collection("groups");
-const addGroup = (e, groupName, setGroupName, selectedFriends) => {
+const addGroup = (
+  e,
+  groupName,
+  setGroupName,
+  selectedFriends,
+  friendsDatas
+) => {
   e.preventDefault();
   const groupId = groupRef.doc().id;
-  groupRef.doc(groupId).set({
-    groupId,
-    name: groupName,
-    members: [...selectedFriends, firebase.auth().currentUser.uid],
-  });
-  selectedFriends.map((selectedFriend) => {
-    userRef.doc(selectedFriend).collection("groups").doc(groupId).set({
-      name: groupId,
+  if (groupName != "") {
+    const filteredFriendsDatas = friendsDatas.filter((friendsData) => {
+      if(selectedFriends.includes(friendsData.friendUid)) return friendsData
     });
-  });
-  userRef
-    .doc(firebase.auth().currentUser.uid)
-    .collection("groups")
-    .doc(groupId)
-    .set({
-      name: groupId,
+    console.log(filteredFriendsDatas);
+    groupRef.doc(groupId).set({
+      groupId,
+      name: groupName,
+      members: [...selectedFriends, firebase.auth().currentUser.uid],
+      friendsData: filteredFriendsDatas
     });
-  setGroupName("");
+    selectedFriends.map((selectedFriend) => {
+      userRef.doc(selectedFriend).collection("groups").doc(groupId).set({
+        name: groupId,
+      });
+    });
+    setGroupName("");
+  } else alert("Please input a valid name");
 };
-function Group({ groups, setGroupId, friends, setActive, setActiveName }) {
+function Group({ groups, setGroupId, setActive, setActiveName }) {
   return (
     <div>
       {

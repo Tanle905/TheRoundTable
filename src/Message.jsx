@@ -45,7 +45,6 @@ const Message = React.memo(() => {
     : null;
   const [userFriendsCollectionData, userFriendsCollectionDataIsLoading] =
     useCollectionData(userFriendRef);
-  //check for better solution
   const [activeFriend, setActiveFriend] = useState([""]);
   const [activeName, setActiveName] = useState([""]);
 
@@ -62,9 +61,10 @@ const Message = React.memo(() => {
   const [groupName, setGroupName] = useState("");
   const [groupId, setGroupId] = useState("");
   const [groupsCollectionData] = useCollectionData(groupRef);
-  const [userGroupCollectionData, userGroupCollectionDataIsLoading] = useCollectionData(
-    userRef.doc(firebase.auth().currentUser.uid).collection("groups")
-  );
+  const [userGroupCollectionData, userGroupCollectionDataIsLoading] =
+    useCollectionData(
+      userRef.doc(firebase.auth().currentUser.uid).collection("groups")
+    );
   //End of group init and variables
 
   /*Component Section*/
@@ -213,7 +213,7 @@ const Message = React.memo(() => {
               userGroupCollectionData &&
               userGroupCollectionData.length !== 0 ? (
                 <button
-                  className="absolute right-2 my-auto text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
+                  className="absolute right-2 my-auto text-gray-600 transition-all hover:rotate-180 hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
                   onClick={(e) => {
                     e.preventDefault();
                     setShowGroupForm(!showGroupForm);
@@ -238,6 +238,7 @@ const Message = React.memo(() => {
                       groupName={groupName}
                       setGroupName={setGroupName}
                       friends={userFriendsCollectionData}
+                      userId={auth.currentUser.uid}
                     />
                   )}
                 </button>
@@ -274,6 +275,7 @@ const Message = React.memo(() => {
                     groupName={groupName}
                     setGroupName={setGroupName}
                     friends={userFriendsCollectionData}
+                    userId={auth.currentUser.uid}
                   />
                 )}
               </div>
@@ -476,7 +478,7 @@ const Message = React.memo(() => {
       <div className="col-span-12 grid h-screen grid-rows-6 lg:col-span-9 xl:col-span-7">
         <div className="row-span-5">
           <div className="flex h-10 bg-gradient-to-r from-blue-300 to-blue-50 text-2xl font-medium text-gray-800 dark:from-indigo-800 dark:to-transparent dark:text-gray-200 xl:h-16 xl:text-3xl">
-            <div className="flex truncate overflow-ellipsis p-1 text-lg xl:hidden xl:p-3">
+            <div className="flex p-1 text-lg xl:hidden xl:p-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="mr-2 h-8 w-8 cursor-pointer"
@@ -562,10 +564,12 @@ const Message = React.memo(() => {
                   setState={setShowFriendList}
                 />
               }
-              {activeName}
+              <p className="line-clamp-1">{activeName}</p>
             </div>
-            <div className="ml-3 hidden truncate overflow-ellipsis p-1 text-lg sm:text-3xl xl:inline xl:p-3">
-              {activeName}
+            <div className="ml-3 hidden p-1 text-lg sm:text-3xl xl:inline-block xl:p-3">
+              <p className="line-clamp-1 truncate text-ellipsis">
+                {activeName}
+              </p>
             </div>
             <div className="my-auto  mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
               <button>
@@ -687,63 +691,65 @@ const Message = React.memo(() => {
               </div>
             </div>
           </div>
-          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-5/6 space-y-4 overflow-y-auto p-1 sm:p-3">
+          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[86%] space-y-4 overflow-y-auto p-1 sm:h-5/6 sm:p-3">
             <Chat />
           </div>
         </div>
-        {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && <div className="row-start-6 mb-auto">
-          <form
-            onSubmit={sendMessage}
-            className="flex justify-center sm:px-3 xl:px-0"
-          >
-            <input
-              type="file"
-              className="hidden"
-              id="selectedFile"
-              onChange={fileHandle}
-            />
-            <label
-              className="my-auto mx-1 cursor-pointer text-gray-600 transition hover:rotate-12 dark:text-gray-400 sm:mr-4"
-              htmlFor="selectedFile"
+        {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
+          <div className="fixed bottom-5 row-start-6 w-[100%] lg:w-[75%] xl:w-[58%]">
+            <form
+              onSubmit={sendMessage}
+              className="flex justify-center sm:px-3 xl:px-0"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <input
+                type="file"
+                className="hidden"
+                id="selectedFile"
+                onChange={fileHandle}
+              />
+              <label
+                className="my-auto mx-1 cursor-pointer text-gray-600 transition hover:rotate-12 dark:text-gray-400 sm:mr-4"
+                htmlFor="selectedFile"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                />
-              </svg>
-            </label>
-            <input
-              className="w-5/6 rounded-full border-gray-300 focus:border-gray-300 focus:ring-0 dark:border-indigo-500 dark:bg-slate-900 dark:text-gray-200"
-              type="text"
-              placeholder="Type messages here..."
-              value={messageValue}
-              onChange={(e) => setMessageValue(e.target.value)}
-            />
-            <button
-              href=""
-              className="my-auto mx-1 rotate-90 text-blue-600 transition hover:rotate-0 dark:text-indigo-500 sm:ml-4 "
-              type="summit"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  />
+                </svg>
+              </label>
+              <input
+                className="w-5/6 rounded-full border-gray-300 focus:border-gray-300 focus:ring-0 dark:border-indigo-500 dark:bg-slate-900 dark:text-gray-200"
+                type="text"
+                placeholder="Type messages here..."
+                value={messageValue}
+                onChange={(e) => setMessageValue(e.target.value)}
+              />
+              <button
+                href=""
+                className="my-auto mx-1 rotate-90 text-blue-600 transition hover:rotate-0 dark:text-indigo-500 sm:ml-4 "
+                type="summit"
               >
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
-            </button>
-          </form>
-        </div>}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        )}
       </div>
       <div className="hidden pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800 lg:col-span-3 lg:block xl:col-span-2">
         <div className="mx-3">
@@ -775,7 +781,7 @@ const Message = React.memo(() => {
                 d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
               />
             </svg>
-            Chat Members
+            Members
           </a>
           <a
             href="#"
@@ -804,7 +810,29 @@ const Message = React.memo(() => {
             Settings
           </a>
         </div>
-        <div>{}</div>
+        <ul className="mt-3 space-y-2 overflow-auto">
+          {groupsCollectionData?.map((group) => {
+            return (
+              group?.groupId === groupId &&
+              group.friendsData.map((friendData, index) => {
+                return (
+                  <li
+                    key={index}
+                    className="group flex truncate p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800 cursor-default"
+                  >
+                    <img
+                      src={friendData.friendphotoURL}
+                      className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
+                    />
+                    <h1 className="ml-2 text-sm font-medium sm:text-lg">
+                      {friendData.friendName}
+                    </h1>
+                  </li>
+                );
+              })
+            );
+          })}
+        </ul>
       </div>
     </section>
   );

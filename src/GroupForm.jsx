@@ -9,16 +9,17 @@ export default function GroupForm({
   groupName,
   setGroupName,
   friends,
+  userId
 }) {
-  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [selectedFriends, setSelectedFriends] = useState([userId]);
   const handleSelectedFriends = (friend) => {
     selectedFriends.includes(friend.friendUid)
-      ? setSelectedFriends((prev) =>
-          prev.filter((element) => element != friend.friendUid)
-        )
-      : setSelectedFriends([...selectedFriends, friend.friendUid]);
+    ? setSelectedFriends((prev) =>
+    prev.filter((element) => element != friend.friendUid)
+    )
+    : setSelectedFriends([...selectedFriends, friend.friendUid]);
   };
-
+  
   return (
     <Transition show={state} as={Fragment}>
       <Dialog
@@ -40,7 +41,7 @@ export default function GroupForm({
           <Dialog.Overlay className="fixed inset-0 bg-gray-200/20" />
         </Transition.Child>
         <div className="fixed max-w-xs h-fit inset-x-10 sm:inset-x-52 inset-y-52">
-          <form onSubmit={(e) => addGroup(e, groupName, setGroupName, selectedFriends)}>
+          <form onSubmit={(e) => addGroup(e, groupName, setGroupName, selectedFriends, friends)}>
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-500 sm:duration-700"
