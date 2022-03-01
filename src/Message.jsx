@@ -833,21 +833,22 @@ const Message = React.memo(() => {
             Settings
           </a>
         </div>
-        <ul className="mt-3 space-y-2 overflow-auto">
+        <ul className="mt-3 max-h-96 space-y-2 overflow-auto">
           {groupsCollectionData?.map((group) => {
             return (
+              
               group?.groupId === groupId &&
               group.friendsData.map((friendData, index) => {
                 return (
                   <li
                     key={index}
-                    className="group flex cursor-default truncate p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
+                    className="group flex cursor-default p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
                   >
                     <img
                       src={friendData.friendphotoURL}
                       className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
                     />
-                    <h1 className="ml-2 text-sm font-medium sm:text-lg">
+                    <h1 className="ml-2 text-xs truncate font-medium sm:text-sm">
                       {friendData.friendName}
                     </h1>
                   </li>
