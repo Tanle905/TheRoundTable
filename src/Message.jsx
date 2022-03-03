@@ -192,7 +192,7 @@ const Message = React.memo(() => {
               ))
             ) : userFriendsCollectionDataIsLoading ? (
               <div className="flex h-[30vh] place-content-center bg-gray-50 dark:bg-slate-900">
-                <div className="my-auto h-24 w-24 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75"></div>
+                <div className="my-auto h-10 sm:h-24 w-10 sm:w-24 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75"></div>
               </div>
             ) : (
               <div className="flex flex-col place-content-center">
@@ -804,7 +804,7 @@ const Message = React.memo(() => {
                 d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
               />
             </svg>
-            Members
+            <p>Members</p>
           </a>
           <a
             href="#"
@@ -830,7 +830,7 @@ const Message = React.memo(() => {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            Settings
+            <p>Settings</p>
           </a>
         </div>
         <ul className="mt-3 max-h-96 space-y-2 overflow-auto">
