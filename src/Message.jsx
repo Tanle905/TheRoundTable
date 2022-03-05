@@ -159,7 +159,7 @@ const Message = React.memo(() => {
                   ? filteredMessages[filteredMessages.length - 1].text
                   : filteredMessages &&
                     filteredMessages.length !== 0 &&
-                    "sent an image"}
+                    "sent a file"}
               </p>
             </div>
             <div className="col-span-2 mr-auto text-gray-700 dark:text-gray-200">
@@ -289,8 +289,18 @@ const Message = React.memo(() => {
 
   //Chat section
   function Chat() {
+    
+    return (
+      <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
+        {messages &&
+          messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
+      </div>
+    );
+  }
+  
+  const ChatMessage = React.memo(
     function ChatMessage(props) {
-      const { image, text, uid, photoURL, sendTo, sentFrom, createdAt } =
+      const { image, video, file, fileName, text, uid, photoURL, sendTo, sentFrom, createdAt } =
         props.message;
       const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
       const date =
@@ -322,6 +332,23 @@ const Message = React.memo(() => {
                 alt=""
               />
             )}
+            {video && (
+              <video
+              controls
+                src={video}
+                className="max-h-96 w-60 max-w-xs rounded-xl sm:max-h-80 sm:w-auto xl:max-w-full "
+                alt=""
+              />
+            )}
+            {
+              file && 
+              <div
+              className="p-3 rounded-sm cursor-pointer bg-blue-500 text-gray-100 dark:bg-indigo-600"
+              onClick={() => window.open(file, file).focus()}
+              >
+                <p>{fileName}</p>
+              </div>
+            }
             <p className="self-center text-xs font-thin text-gray-800 dark:text-gray-400 sm:text-sm">
               {date}
             </p>
@@ -329,15 +356,7 @@ const Message = React.memo(() => {
         );
       } else return "";
     }
-
-    return (
-      <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
-        {messages &&
-          messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
-      </div>
-    );
-  }
-
+  )
   const sendMessage = async (e) => {
     e.preventDefault();
     if (messageValue !== "") {
@@ -359,18 +378,52 @@ const Message = React.memo(() => {
   const fileHandle = async (event) => {
     event.preventDefault();
     const file = event.target.files[0];
-    const fileImagesRef = ref(storage, "images/" + file.name);
-    await uploadBytes(fileImagesRef, file).then((snapshot) => {});
-    getDownloadURL(fileImagesRef).then(async (url) => {
-      const { uid, photoURL } = auth.currentUser;
-      await messagesRef.add({
-        image: url,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        uid,
-        photoURL,
-        sentFrom: user.uid,
-        sendTo: activeFriend,
+    const fileImagesRef = ref(storage, "files/" + file.name);
+    await uploadBytes(fileImagesRef, file).then((snapshot) => {
+      const fileType = snapshot.metadata.contentType.slice(0, snapshot.metadata.contentType.indexOf("/"))
+      console.log(fileType)
+      getDownloadURL(fileImagesRef).then(async (url) => {
+        const { uid, photoURL } = auth.currentUser;
+        switch(fileType){
+          case "image":{
+            await messagesRef.add({
+              image: url,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              uid,
+              photoURL,
+              sentFrom: user.uid,
+              sendTo: activeFriend,
+            });
+            break;
+          }
+          case "video":{
+            await messagesRef.add({
+              video: url,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              uid,
+              photoURL,
+              sentFrom: user.uid,
+              sendTo: activeFriend,
+            });
+            break;
+          }
+          default:{
+            await messagesRef.add({
+              file: url,
+              fileName: snapshot.metadata.name,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              uid,
+              photoURL,
+              sentFrom: user.uid,
+              sendTo: activeFriend,
+            });
+            break;
+          }
+        }
+
+
       });
+    
     });
   };
   function File({ imgs }) {
@@ -384,7 +437,7 @@ const Message = React.memo(() => {
             auth.currentUser.uid === img.sendTo) ||
           groupId === img.sendTo
         )
-          return img.image;
+          return img;
       });
     function FileRender({ img }) {
       return (
@@ -393,11 +446,21 @@ const Message = React.memo(() => {
             className="cursor-pointer"
             onClick={() => window.open(img.image, img.image).focus()}
           >
-            <img
+            {
+              img.image && <img
               className="h-56 max-w-md rounded-md object-cover transition hover:-translate-y-1 sm:h-28"
               src={img.image}
               alt=""
             />
+            }
+            {
+              img.video && <video
+              controls
+              className="h-56 max-w-md rounded-md object-cover transition hover:-translate-y-1 sm:h-28"
+              src={img.video}
+              alt=""
+            />
+            }
           </a>
         </li>
       );
