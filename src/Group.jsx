@@ -25,7 +25,6 @@ const addGroup = (
     const filteredFriendsDatas = friendsDatas.filter((friendsData) => {
       if(selectedFriends.includes(friendsData.friendUid)) return friendsData
     });
-    console.log(filteredFriendsDatas);
     groupRef.doc(groupId).set({
       groupId,
       name: groupName,
@@ -42,7 +41,7 @@ const addGroup = (
 };
 function Group({ groups, setGroupId, setActive, setActiveName }) {
   return (
-    <div>
+    <div className="max-h-[35vh] overflow-auto">
       {
         <ul>
           {groups &&

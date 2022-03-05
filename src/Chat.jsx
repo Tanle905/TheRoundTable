@@ -2,6 +2,15 @@ import React from "react";
 import firebase from "firebase/compat/app";
 import moment from "moment";
 
+firebase.initializeApp({
+  apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
+  authDomain: "the-round-table-ffc3f.firebaseapp.com",
+  projectId: "the-round-table-ffc3f",
+  storageBucket: "the-round-table-ffc3f.appspot.com",
+  messagingSenderId: "551826854387",
+  appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
+  measurementId: "G-3NRE8RWMTD",
+});
 const auth = firebase.auth();
 
 const Chat = React.memo(({ messages, activeFriend, groupId }) => {

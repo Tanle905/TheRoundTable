@@ -4,15 +4,11 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import moment from "moment";
 import SlideOver from "./SlideOver";
 import SlideOver2 from "./SlideOver2";
-import GroupForm from "./GroupForm";
 import Chat from "./Chat";
 import File from "./File";
-import { Group } from "./Group";
-import firstTimeGroupImg from "./svg/teammeeting.svg";
-import friendSvg from "./svg/groupImg.svg";
+import Friends from "./Friends";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -102,186 +98,7 @@ const Message = React.memo(() => {
       setUidValue("");
     }
   };
-  function Friends({ msg }) {
-    const FriendsList = React.memo(function FriendsList(props) {
-      const { friendUid, friendName, friendphotoURL } = props.friends;
-      const friendClass =
-        friendUid === activeFriend ? "friend-active" : "friend-inactive";
-      const friendRefHandle = () => {
-        setActiveFriend(friendUid);
-        setActiveName(friendName);
-        setGroupId(null);
-      };
 
-      const filteredMessages =
-        friendUid &&
-        props.msg &&
-        props.msg.filter((message) => {
-          if (
-            (friendUid === message.sendTo &&
-              auth.currentUser.uid === message.sentFrom) ||
-            (friendUid === message.sentFrom &&
-              auth.currentUser.uid === message.sendTo)
-          )
-            return message;
-        });
-      const latestMessages =
-        filteredMessages != null &&
-        filteredMessages.length !== 0 &&
-        filteredMessages[filteredMessages.length - 1].createdAt != null &&
-        filteredMessages[filteredMessages.length - 1].createdAt.toDate();
-      return (
-        <li
-          className={`group transition ${friendClass} `}
-          onClick={friendRefHandle}
-        >
-          <div className="grid grid-cols-10 space-x-2 rounded-lg p-2 transition-all hover:cursor-pointer focus:bg-gray-200">
-            <img
-              className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
-              src={friendphotoURL}
-              alt=""
-            />
-            <div className="col-span-7 flex-col truncate text-gray-800 dark:text-gray-300">
-              <h1 className="text-sm font-medium sm:text-lg">{friendName}</h1>
-              <p className="flex text-xs">
-                <span className="mr-2 ">
-                  {filteredMessages && filteredMessages.length !== 0
-                    ? filteredMessages[filteredMessages.length - 1].uid ===
-                      friendUid
-                      ? ""
-                      : "You:"
-                    : ""}
-                </span>
-                {filteredMessages &&
-                filteredMessages.length !== 0 &&
-                filteredMessages[filteredMessages.length - 1].text
-                  ? filteredMessages[filteredMessages.length - 1].text
-                  : filteredMessages &&
-                    filteredMessages.length !== 0 &&
-                    "sent a file"}
-              </p>
-            </div>
-            <div className="col-span-2 mr-auto text-gray-700 dark:text-gray-200">
-              <p className="line-clamp-2 text-xs">
-                {filteredMessages &&
-                  filteredMessages.length !== 0 &&
-                  moment(latestMessages).startOf("minute").fromNow()}
-              </p>
-            </div>
-          </div>
-        </li>
-      );
-    });
-    return (
-      <div>
-        <div className="grid grid-rows-3">
-          <ul className="row-span-1 flex h-[33vh] flex-col overflow-auto">
-            <p
-              className="my-1 cursor-pointer place-self-center rounded-xl bg-blue-200 p-1 text-gray-800 transition hover:bg-slate-500 dark:bg-slate-700 dark:text-gray-200"
-              onClick={() => {
-                navigator.clipboard.writeText(auth.currentUser.uid);
-              }}
-            >
-              <span className="font-semibold">UID:</span> {auth.currentUser.uid}
-            </p>
-            {userFriendsCollectionData &&
-            userFriendsCollectionData.length !== 0 ? (
-              userFriendsCollectionData.map((element, index) => (
-                <FriendsList friends={element} key={index} msg={msg} />
-              ))
-            ) : userFriendsCollectionDataIsLoading ? (
-              <div className="flex h-[30vh] place-content-center bg-gray-50 dark:bg-slate-900">
-                <div className="my-auto h-10 w-10 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75 sm:h-24 sm:w-24"></div>
-              </div>
-            ) : (
-              <div className="flex flex-col place-content-center">
-                <img src={friendSvg} className="mx-auto h-2/3 w-2/3" />
-                <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  You do not have any friend. Let's make some!!!
-                </h1>
-              </div>
-            )}
-          </ul>
-          <div className="row-span-2 max-w-xs sm:max-w-none">
-            <div className=" relative flex border-y-2 border-gray-200 py-2 px-4 align-middle dark:border-slate-800">
-              <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200">
-                Groups
-              </h1>
-              {groupsCollectionData &&
-              groupsCollectionData.length !== 0 &&
-              userGroupCollectionData &&
-              userGroupCollectionData.length !== 0 ? (
-                <button
-                  className="absolute right-2 my-auto text-gray-600 transition-all hover:rotate-180 hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
-                  onClick={(e) => {
-                    if (showFriendList) setShowFriendList(!showFriendList);
-                    e.preventDefault();
-                    setShowGroupForm(!showGroupForm);
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {showGroupForm && (
-                    <GroupForm
-                      state={showGroupForm}
-                      setState={setShowGroupForm}
-                      friends={userFriendsCollectionData}
-                      userId={auth.currentUser.uid}
-                    />
-                  )}
-                </button>
-              ) : (
-                ""
-              )}
-            </div>
-            {userGroupCollectionData && userGroupCollectionData.length !== 0 ? (
-              <Group
-                groups={groupsCollectionData}
-                setActive={setActiveFriend}
-                setGroupId={setGroupId}
-                setActiveName={setActiveName}
-              />
-            ) : (
-              <div className="flex flex-col place-content-center">
-                <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
-                <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  You do not have any group. Let's create one!!!
-                </h1>
-                <button
-                  onClick={(e) => {
-                    if (showFriendList) setShowFriendList(!showFriendList);
-                    e.preventDefault();
-                    setShowGroupForm(!showGroupForm);
-                  }}
-                  className="m-10 rounded-lg bg-blue-600 p-3 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
-                >
-                  Add Group
-                </button>
-                {showGroupForm && (
-                  <GroupForm
-                    state={showGroupForm}
-                    setState={setShowGroupForm}
-                    friends={userFriendsCollectionData}
-                    userId={auth.currentUser.uid}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
   //END OF Friends Section ( FriendsList and addFriend)
 
   //Chat section
@@ -416,7 +233,22 @@ const Message = React.memo(() => {
             </button>
           </form>
         </div>
-        <Friends msg={messages} />
+        <Friends
+          msg={messages}
+          userFriendsCollectionData={userFriendsCollectionData}
+          userFriendsCollectionDataIsLoading={
+            userFriendsCollectionDataIsLoading
+          }
+          groupsCollectionData={groupsCollectionData}
+          userGroupCollectionData={userGroupCollectionData}
+          showGroupForm={showGroupForm}
+          activeFriend={activeFriend}
+          setActiveFriend={setActiveFriend}
+          setGroupId={setGroupId}
+          setActiveName={setActiveName}
+          showFriendList={showFriendList}
+          setShowGroupForm={setShowGroupForm}
+        />
       </div>
       <div className="col-span-12 grid h-screen grid-rows-6 lg:col-span-9 xl:col-span-7">
         <div className="row-span-5">
@@ -439,72 +271,23 @@ const Message = React.memo(() => {
               </svg>
               {
                 <SlideOver
-                  content={
-                    <div>
-                      <div className="flex border-b-2 border-gray-200 px-4 dark:border-slate-800">
-                        <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200">
-                          Friends
-                        </h1>
-                        <form className="group relative ml-auto py-3 sm:mr-2">
-                          <input
-                            className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
-                            type="search"
-                            name="search"
-                            placeholder="Find a Friends..."
-                          />
-                          <button className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                              />
-                            </svg>
-                          </button>
-                        </form>
-                        <form
-                          className="group relative my-auto py-3"
-                          onSubmit={addfriend}
-                        >
-                          <input
-                            key="uidInput"
-                            className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 xl:focus:w-44 xl:group-hover:w-44"
-                            type="text"
-                            placeholder="Add a Friend UID"
-                            value={uidValue}
-                            onChange={(e) => setUidValue(e.target.value)}
-                          />
-                          <button
-                            className="absolute right-2 top-0 mt-5 text-gray-600 transition-all group-hover:rotate-180 dark:text-gray-50"
-                            type="submit"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        </form>
-                      </div>
-                      <Friends msg={messages} />
-                    </div>
+                  addfriend={addfriend}
+                  uidValue={uidValue}
+                  messages={messages}
+                  userFriendsCollectionData={userFriendsCollectionData}
+                  userFriendsCollectionDataIsLoading={
+                    userFriendsCollectionDataIsLoading
                   }
-                  state={showFriendList}
-                  setState={setShowFriendList}
+                  groupsCollectionData={groupsCollectionData}
+                  userGroupCollectionData={userGroupCollectionData}
+                  showGroupForm={showGroupForm}
+                  activeFriend={activeFriend}
+                  setActiveFriend={setActiveFriend}
+                  setGroupId={setGroupId}
+                  setActiveName={setActiveName}
+                  setShowGroupForm={setShowGroupForm}
+                  showFriendList={showFriendList}
+                  setShowFriendList={setShowFriendList}
                 />
               }
               <p className="line-clamp-1">{activeName}</p>
@@ -565,95 +348,10 @@ const Message = React.memo(() => {
                 </svg>
                 {
                   <SlideOver2
-                    content={
-                      <div>
-                        <div className="mx-3">
-                          <div className="overflow-auto">
-                            <File
-                              files={messages}
-                              activeFriend={activeFriend}
-                              groupId={groupId}
-                            />
-                          </div>
-                          <a href="#" className="text-center">
-                            <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
-                              View shared file...
-                            </h1>
-                          </a>
-                        </div>
-                        <div className="grid grid-cols-2 content-center">
-                          <a
-                            href="#"
-                            className="text-md group active col-span-1 flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-                              />
-                            </svg>
-                            Members
-                          </a>
-                          <a
-                            href="#"
-                            className="text-md group col-span-1 flex justify-center border-b-2 py-4 text-center font-medium text-gray-600 dark:text-gray-300"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6 transform-gpu transition group-hover:rotate-180"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                            </svg>
-                            Settings
-                          </a>
-                        </div>
-                        <ul className="mt-3 space-y-2 overflow-auto">
-                          {groupsCollectionData?.map((group) => {
-                            return (
-                              group?.groupId === groupId &&
-                              group.friendsData.map((friendData, index) => {
-                                return (
-                                  <li
-                                    key={index}
-                                    className="group flex cursor-default truncate p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
-                                  >
-                                    <img
-                                      src={friendData.friendphotoURL}
-                                      className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
-                                    />
-                                    <h1 className="ml-2 text-sm font-medium sm:text-lg">
-                                      {friendData.friendName}
-                                    </h1>
-                                  </li>
-                                );
-                              })
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    }
+                    messages={messages}
+                    activeFriend={activeFriend}
+                    groupId={groupId}
+                    groupsCollectionData={groupsCollectionData}
                     state={showFile}
                     setState={setShowFile}
                   />
@@ -661,7 +359,7 @@ const Message = React.memo(() => {
               </div>
             </div>
           </div>
-          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[86%] space-y-4 overflow-y-auto p-1 sm:h-5/6 sm:p-3">
+          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[86%] space-y-4 overflow-y-auto p-1 sm:h-[75vh] sm:p-3">
             <Chat
               messages={messages}
               activeFriend={activeFriend}
@@ -740,62 +438,43 @@ const Message = React.memo(() => {
             </h1>
           </a>
         </div>
-        <div className="grid grid-cols-2 content-center">
-          <a
-            href="#"
-            className="text-md group active col-span-1 flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500"
+        <div className="text-md group active flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-              />
-            </svg>
-            <p>Members</p>
-          </a>
-          <a
-            href="#"
-            className="text-md group col-span-1 flex justify-center border-b-2 py-4 text-center font-medium text-gray-600 dark:text-gray-300"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 transform-gpu transition group-hover:rotate-180"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            <p>Settings</p>
-          </a>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+            />
+          </svg>
+          <p>Members</p>
         </div>
         <ul className="mt-3 max-h-96 space-y-2 overflow-auto">
+          <li
+            key={0}
+            className="group flex cursor-default p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
+          >
+            <img
+              src={auth.currentUser.photoURL}
+              className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
+            />
+            <h1 className="ml-2 truncate text-xs font-medium sm:text-sm">
+              {auth.currentUser.displayName}
+            </h1>
+          </li>
           {groupsCollectionData?.map((group) => {
             return (
               group?.groupId === groupId &&
               group.friendsData.map((friendData, index) => {
                 return (
                   <li
-                    key={index}
+                    key={index+1}
                     className="group flex cursor-default p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
                   >
                     <img

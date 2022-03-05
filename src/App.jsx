@@ -46,7 +46,7 @@ const App = () => {
     someThing = <SignIn />;
   } else {
     someThing = (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex place-content-center">
+      <div className="h-screen bg-gray-50 dark:bg-slate-900 flex place-content-center">
         <div className="animate-bounce my-auto w-24 h-24 bg-blue-500 dark:bg-indigo-500 rounded-lg shadow-2xl dark:shadow-indigo-800/75"></div>
       </div>
     );
