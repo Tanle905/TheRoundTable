@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 import firebase from "firebase/compat/app";
-import "firebase/compat/firestore";
-import "firebase/compat/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useState } from "react";
@@ -10,6 +8,8 @@ import moment from "moment";
 import SlideOver from "./SlideOver";
 import SlideOver2 from "./SlideOver2";
 import GroupForm from "./GroupForm";
+import Chat from "./Chat";
+import File from "./File";
 import { Group } from "./Group";
 import firstTimeGroupImg from "./svg/teammeeting.svg";
 import friendSvg from "./svg/groupImg.svg";
@@ -58,7 +58,6 @@ const Message = React.memo(() => {
   //Group init and variables
   const groupRef = firebase.firestore().collection("groups");
   const [showGroupForm, setShowGroupForm] = useState(false);
-  const [groupName, setGroupName] = useState("");
   const [groupId, setGroupId] = useState("");
   const [groupsCollectionData] = useCollectionData(groupRef);
   const [userGroupCollectionData, userGroupCollectionDataIsLoading] =
@@ -192,7 +191,7 @@ const Message = React.memo(() => {
               ))
             ) : userFriendsCollectionDataIsLoading ? (
               <div className="flex h-[30vh] place-content-center bg-gray-50 dark:bg-slate-900">
-                <div className="my-auto h-10 sm:h-24 w-10 sm:w-24 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75"></div>
+                <div className="my-auto h-10 w-10 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75 sm:h-24 sm:w-24"></div>
               </div>
             ) : (
               <div className="flex flex-col place-content-center">
@@ -215,6 +214,7 @@ const Message = React.memo(() => {
                 <button
                   className="absolute right-2 my-auto text-gray-600 transition-all hover:rotate-180 hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
                   onClick={(e) => {
+                    if (showFriendList) setShowFriendList(!showFriendList);
                     e.preventDefault();
                     setShowGroupForm(!showGroupForm);
                   }}
@@ -235,8 +235,6 @@ const Message = React.memo(() => {
                     <GroupForm
                       state={showGroupForm}
                       setState={setShowGroupForm}
-                      groupName={groupName}
-                      setGroupName={setGroupName}
                       friends={userFriendsCollectionData}
                       userId={auth.currentUser.uid}
                     />
@@ -261,6 +259,7 @@ const Message = React.memo(() => {
                 </h1>
                 <button
                   onClick={(e) => {
+                    if (showFriendList) setShowFriendList(!showFriendList);
                     e.preventDefault();
                     setShowGroupForm(!showGroupForm);
                   }}
@@ -272,8 +271,6 @@ const Message = React.memo(() => {
                   <GroupForm
                     state={showGroupForm}
                     setState={setShowGroupForm}
-                    groupName={groupName}
-                    setGroupName={setGroupName}
                     friends={userFriendsCollectionData}
                     userId={auth.currentUser.uid}
                   />
@@ -288,75 +285,7 @@ const Message = React.memo(() => {
   //END OF Friends Section ( FriendsList and addFriend)
 
   //Chat section
-  function Chat() {
-    
-    return (
-      <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
-        {messages &&
-          messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
-      </div>
-    );
-  }
-  
-  const ChatMessage = React.memo(
-    function ChatMessage(props) {
-      const { image, video, file, fileName, text, uid, photoURL, sendTo, sentFrom, createdAt } =
-        props.message;
-      const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
-      const date =
-        createdAt != null &&
-        moment(createdAt.toDate()).locale("vi").format("lll");
-      if (
-        (activeFriend === sendTo && auth.currentUser.uid === sentFrom) ||
-        (activeFriend === sentFrom && auth.currentUser.uid === sendTo) ||
-        groupId === sendTo
-      ) {
-        return (
-          <div className={`flex space-x-2 space-y-2 ${messageClass}`}>
-            <img
-              className={`mb-1 mt-auto h-6 w-6 rounded-full ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
-              src={photoURL}
-              alt=""
-            />
-            {text ? (
-              <p className="max-w-[15rem] whitespace-normal break-words rounded-xl bg-blue-500 p-2 py-1 dark:bg-indigo-500 sm:max-w-xl">
-                {text}
-              </p>
-            ) : (
-              ""
-            )}
-            {image && (
-              <img
-                src={image}
-                className="max-h-96 w-60 max-w-xs rounded-xl sm:max-h-80 sm:w-auto xl:max-w-full "
-                alt=""
-              />
-            )}
-            {video && (
-              <video
-              controls
-                src={video}
-                className="max-h-96 w-60 max-w-xs rounded-xl sm:max-h-80 sm:w-auto xl:max-w-full "
-                alt=""
-              />
-            )}
-            {
-              file && 
-              <div
-              className="p-3 rounded-sm cursor-pointer bg-blue-500 text-gray-100 dark:bg-indigo-600"
-              onClick={() => window.open(file, file).focus()}
-              >
-                <p>{fileName}</p>
-              </div>
-            }
-            <p className="self-center text-xs font-thin text-gray-800 dark:text-gray-400 sm:text-sm">
-              {date}
-            </p>
-          </div>
-        );
-      } else return "";
-    }
-  )
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (messageValue !== "") {
@@ -380,12 +309,14 @@ const Message = React.memo(() => {
     const file = event.target.files[0];
     const fileImagesRef = ref(storage, "files/" + file.name);
     await uploadBytes(fileImagesRef, file).then((snapshot) => {
-      const fileType = snapshot.metadata.contentType.slice(0, snapshot.metadata.contentType.indexOf("/"))
-      console.log(fileType)
+      const fileType = snapshot.metadata.contentType.slice(
+        0,
+        snapshot.metadata.contentType.indexOf("/")
+      );
       getDownloadURL(fileImagesRef).then(async (url) => {
         const { uid, photoURL } = auth.currentUser;
-        switch(fileType){
-          case "image":{
+        switch (fileType) {
+          case "image": {
             await messagesRef.add({
               image: url,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -396,7 +327,7 @@ const Message = React.memo(() => {
             });
             break;
           }
-          case "video":{
+          case "video": {
             await messagesRef.add({
               video: url,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -407,7 +338,7 @@ const Message = React.memo(() => {
             });
             break;
           }
-          default:{
+          default: {
             await messagesRef.add({
               file: url,
               fileName: snapshot.metadata.name,
@@ -420,61 +351,10 @@ const Message = React.memo(() => {
             break;
           }
         }
-
-
       });
-    
     });
   };
-  function File({ imgs }) {
-    const filteredImgs =
-      imgs != null &&
-      imgs.filter((img) => {
-        if (
-          (activeFriend === img.sendTo &&
-            auth.currentUser.uid === img.sentFrom) ||
-          (activeFriend === img.sentFrom &&
-            auth.currentUser.uid === img.sendTo) ||
-          groupId === img.sendTo
-        )
-          return img;
-      });
-    function FileRender({ img }) {
-      return (
-        <li className="mx-1">
-          <a
-            className="cursor-pointer"
-            onClick={() => window.open(img.image, img.image).focus()}
-          >
-            {
-              img.image && <img
-              className="h-56 max-w-md rounded-md object-cover transition hover:-translate-y-1 sm:h-28"
-              src={img.image}
-              alt=""
-            />
-            }
-            {
-              img.video && <video
-              controls
-              className="h-56 max-w-md rounded-md object-cover transition hover:-translate-y-1 sm:h-28"
-              src={img.video}
-              alt=""
-            />
-            }
-          </a>
-        </li>
-      );
-    }
-    return (
-      <ul className="flex max-h-60 flex-row-reverse justify-end py-2 sm:max-h-32">
-        {imgs &&
-          filteredImgs.map((img, index) => {
-            if (filteredImgs.length < 6 || index > filteredImgs.length - 10)
-              return <FileRender img={img} key={index} />;
-          })}
-      </ul>
-    );
-  }
+
   //END OF fileHandle section
   /*END OF Component Section*/
   return (
@@ -689,7 +569,11 @@ const Message = React.memo(() => {
                       <div>
                         <div className="mx-3">
                           <div className="overflow-auto">
-                            <File imgs={messages} />
+                            <File
+                              files={messages}
+                              activeFriend={activeFriend}
+                              groupId={groupId}
+                            />
                           </div>
                           <a href="#" className="text-center">
                             <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
@@ -778,11 +662,15 @@ const Message = React.memo(() => {
             </div>
           </div>
           <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[86%] space-y-4 overflow-y-auto p-1 sm:h-5/6 sm:p-3">
-            <Chat />
+            <Chat
+              messages={messages}
+              activeFriend={activeFriend}
+              groupId={groupId}
+            />
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
-          <div className="fixed bottom-5 row-start-6 w-[100%] lg:w-[75%] xl:w-[58%]">
+          <div className="fixed bottom-5 row-start-6 w-[100%] bg-gray-50 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
             <form
               onSubmit={sendMessage}
               className="flex justify-center sm:px-3 xl:px-0"
@@ -840,7 +728,11 @@ const Message = React.memo(() => {
       <div className="hidden pt-3 shadow-md shadow-gray-500 dark:shadow-slate-800 lg:col-span-3 lg:block xl:col-span-2">
         <div className="mx-3">
           <div className="overflow-auto">
-            <File imgs={messages} />
+            <File
+              files={messages}
+              activeFriend={activeFriend}
+              groupId={groupId}
+            />
           </div>
           <a href="#" className="text-center">
             <h1 className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
@@ -899,7 +791,6 @@ const Message = React.memo(() => {
         <ul className="mt-3 max-h-96 space-y-2 overflow-auto">
           {groupsCollectionData?.map((group) => {
             return (
-              
               group?.groupId === groupId &&
               group.friendsData.map((friendData, index) => {
                 return (
@@ -911,7 +802,7 @@ const Message = React.memo(() => {
                       src={friendData.friendphotoURL}
                       className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
                     />
-                    <h1 className="ml-2 text-xs truncate font-medium sm:text-sm">
+                    <h1 className="ml-2 truncate text-xs font-medium sm:text-sm">
                       {friendData.friendName}
                     </h1>
                   </li>
