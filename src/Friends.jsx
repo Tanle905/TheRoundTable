@@ -61,10 +61,10 @@ function Friends({
             src={friendphotoURL}
             alt=""
           />
-          <div className="col-span-7 flex-col truncate text-gray-800 dark:text-gray-300">
+          <div className="col-span-7 flex-col text-gray-800 dark:text-gray-300">
             <h1 className="text-sm font-medium sm:text-lg">{friendName}</h1>
-            <p className="flex text-xs">
-              <span className="mr-2 ">
+            <div className="flex text-xs">
+              <span className="mr-2">
                 {filteredMessages && filteredMessages.length !== 0
                   ? filteredMessages[filteredMessages.length - 1].uid ===
                     friendUid
@@ -75,11 +75,11 @@ function Friends({
               {filteredMessages &&
               filteredMessages.length !== 0 &&
               filteredMessages[filteredMessages.length - 1].text
-                ? filteredMessages[filteredMessages.length - 1].text
+                ? <p className="truncate text-ellipsis">{filteredMessages[filteredMessages.length - 1].text}</p>
                 : filteredMessages &&
                   filteredMessages.length !== 0 &&
                   "sent a file"}
-            </p>
+            </div>
           </div>
           <div className="col-span-2 mr-auto text-gray-700 dark:text-gray-200">
             <p className="line-clamp-2 text-xs">

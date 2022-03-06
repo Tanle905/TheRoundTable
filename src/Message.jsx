@@ -121,8 +121,10 @@ const Message = React.memo(() => {
   //END OF Chat section
 
   //fileHandle section
+  const [fileIsLoading, setFileIsLoading] = useState(false);
   const fileHandle = async (event) => {
     event.preventDefault();
+    setFileIsLoading(true);
     const file = event.target.files[0];
     const fileImagesRef = ref(storage, "files/" + file.name);
     await uploadBytes(fileImagesRef, file).then((snapshot) => {
@@ -131,6 +133,7 @@ const Message = React.memo(() => {
         snapshot.metadata.contentType.indexOf("/")
       );
       getDownloadURL(fileImagesRef).then(async (url) => {
+        setFileIsLoading(false);
         const { uid, photoURL } = auth.currentUser;
         switch (fileType) {
           case "image": {
@@ -171,7 +174,6 @@ const Message = React.memo(() => {
       });
     });
   };
-
   //END OF fileHandle section
   /*END OF Component Section*/
   return (
@@ -405,20 +407,39 @@ const Message = React.memo(() => {
                 value={messageValue}
                 onChange={(e) => setMessageValue(e.target.value)}
               />
-              <button
-                href=""
-                className="my-auto mx-1 rotate-90 text-blue-600 transition hover:rotate-0 dark:text-indigo-500 sm:ml-4 "
-                type="summit"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-7 w-7"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+              {!fileIsLoading ? (
+                <button
+                  href=""
+                  className="my-auto mx-1 rotate-90 text-blue-600 transition hover:rotate-0 dark:text-indigo-500 sm:ml-4 "
+                  type="summit"
                 >
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-7 w-7"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  </svg>
+                </button>
+              ) : (
+                <svg
+                  role="status"
+                  className="my-auto mx-1 h-8 w-8 animate-spin fill-blue-600 text-gray-200 dark:fill-indigo-500 dark:text-gray-600 sm:ml-4"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
                 </svg>
-              </button>
+              )}
             </form>
           </div>
         )}
@@ -456,25 +477,13 @@ const Message = React.memo(() => {
           <p>Members</p>
         </div>
         <ul className="mt-3 max-h-96 space-y-2 overflow-auto">
-          <li
-            key={0}
-            className="group flex cursor-default p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
-          >
-            <img
-              src={auth.currentUser.photoURL}
-              className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
-            />
-            <h1 className="ml-2 truncate text-xs font-medium sm:text-sm">
-              {auth.currentUser.displayName}
-            </h1>
-          </li>
           {groupsCollectionData?.map((group) => {
             return (
               group?.groupId === groupId &&
               group.friendsData.map((friendData, index) => {
                 return (
                   <li
-                    key={index+1}
+                    key={index + 1}
                     className="group flex cursor-default p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
                   >
                     <img

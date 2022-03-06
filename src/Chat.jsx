@@ -44,7 +44,7 @@ const Chat = React.memo(({ messages, activeFriend, groupId }) => {
             alt=""
           />
           {text ? (
-            <p className="max-w-[15rem] whitespace-normal break-words rounded-xl bg-blue-500 p-2 py-1 dark:bg-indigo-500 sm:max-w-xl">
+            <p className="max-w-[15rem] rounded-xl bg-blue-500 p-2 py-1 dark:bg-indigo-500 sm:max-w-xl">
               {text}
             </p>
           ) : (
