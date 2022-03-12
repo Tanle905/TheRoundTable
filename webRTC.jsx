@@ -1,44 +1,7 @@
+import { useEffect, useRef, useState } from "react";
+
 //WebRTC
-  const servers = {
-    iceservers: [
-      {
-        urls: [
-          "stun.l.google.com:19302",
-          "stun3.l.google.com:19302",
-          "stunserver.org",
-        ],
-      },
-    ],
-    iceCandidatePoolSize: 10,
-  };
-  let pc = new RTCPeerConnection(servers);
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
-
-  let localStreamRef = useRef(null);
-
-  const videoCallHandle = async () => {
-    setLocalStream(
-      await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      })
-    );
-    setRemoteStream(new MediaStream());
-    //Push track from local stram to peer connection
-    localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream);
-    });
-
-    //Pull tracks from remote stream, add to video stream
-    pc.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
-      });
-    };
-    localStreamRef = localStream;
-    remoteVideo.srcObject = remoteStream;
-  };
+function RTC() {
   //2. Create an offer
   const startCalling = async () => {
     //Reference firestore collection
@@ -117,4 +80,5 @@
       });
     });
   };
-  //END OF WebRTC
+}
+//END OF WebRTC

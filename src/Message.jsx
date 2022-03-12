@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import firebase from "firebase/compat/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useCollectionData } from "react-firebase-hooks/firestore";
@@ -61,6 +61,27 @@ const Message = React.memo(() => {
       userRef.doc(firebase.auth().currentUser.uid).collection("groups")
     );
   //End of group init and variables
+
+  //WebRTC init and variables
+  const servers = {
+    iceservers: [
+      {
+        urls: [
+          "stun.l.google.com:19302",
+          "stun3.l.google.com:19302",
+          "stunserver.org",
+        ],
+      },
+    ],
+    iceCandidatePoolSize: 10,
+  };
+  let pc = new RTCPeerConnection(servers);
+  let localStream= null
+  const [remoteStream, setRemoteStream] = useState(null);
+
+  let localStreamRef = useRef(null);
+  let remoteStreamRef = useRef(null);
+  //End of WebRTC init and variables
 
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
@@ -175,6 +196,34 @@ const Message = React.memo(() => {
     });
   };
   //END OF fileHandle section
+
+  //WebRTC section
+  const videoCallHandle = async () => {
+    localStream = 
+      await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      })
+    
+    setRemoteStream(new MediaStream());
+    //Push track from local stram to peer connection
+    localStream.getTracks().forEach((track) => {
+      pc.addTrack(track, localStream);
+    });
+
+    //Pull tracks from remote stream, add to video stream
+    pc.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+      });
+    };
+    let localVideo = localStreamRef.current;
+    localVideo.srcObject = localStream;
+    localVideo.play();
+    let remoteVideo = remoteStreamRef.current;
+  };
+  //End of WebRTC section
+
   /*END OF Component Section*/
   return (
     <section className="grid grid-cols-12 bg-gray-50 dark:bg-slate-900">
@@ -316,7 +365,7 @@ const Message = React.memo(() => {
                   />
                 </svg>
               </button>
-              <button>
+              <button name="video-call" onClick={videoCallHandle}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -367,10 +416,11 @@ const Message = React.memo(() => {
               activeFriend={activeFriend}
               groupId={groupId}
             />
+            <video ref={localStreamRef}></video>
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
-          <div className="fixed bottom-5 row-start-6 w-[100%] bg-gray-50 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
+          <div className="fixed bottom-5 row-start-6 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
             <form
               onSubmit={sendMessage}
               className="flex justify-center sm:px-3 xl:px-0"
