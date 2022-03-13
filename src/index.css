@@ -41,4 +41,22 @@ code {
   ::-webkit-scrollbar-thumb {
     @apply rounded-sm bg-blue-400/60 dark:bg-indigo-600/50;
   }
+  audio::-webkit-media-controls-time-remaining-display {
+    @apply hidden
+  }
+  audio::-webkit-media-controls-current-time-display {
+    @apply hidden
+  }
+  audio::-webkit-media-controls-mute-button {
+    @apply m-0
+  }
+  audio::-webkit-media-controls-play-button {
+    @apply m-0 
+  }
+  audio::-webkit-media-controls-timeline {
+    @apply px-3 
+  }
+  audio::-webkit-media-controls-enclosure {
+    @apply rounded-md
+  }
 }

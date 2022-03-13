@@ -149,7 +149,6 @@ const Message = React.memo(() => {
     const file = event.target.files[0];
     const fileImagesRef = ref(storage, "files/" + file.name);
     await uploadBytes(fileImagesRef, file).then((snapshot) => {
-      console.log(snapshot.metadata.contentType);
       const fileType = snapshot.metadata.contentType.slice(
         0,
         snapshot.metadata.contentType.indexOf("/")

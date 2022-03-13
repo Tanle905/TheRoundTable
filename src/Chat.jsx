@@ -14,7 +14,6 @@ firebase.initializeApp({
 const auth = firebase.auth();
 
 const ChatMessage = React.memo(({message, activeFriend, groupId}) => {
-  console.log(message)
   const {
     image,
     video,
@@ -74,9 +73,9 @@ const ChatMessage = React.memo(({message, activeFriend, groupId}) => {
           </div>
         )}
         {audio && (
-          <div className="max-w-sm rounded-sm bg-blue-500 p-2 text-gray-100 dark:bg-indigo-600">
-            <p className="truncate">{fileName}</p>
-            <audio controls className="min-w-full p-1">
+          <div className="w-64 rounded-md bg-blue-500 p-2 pb-0 text-gray-100 dark:bg-indigo-600">
+            <p className="truncate text-sm">{fileName}</p>
+            <audio controls className="py-2 w-full">
               <source src={audio} />
             </audio>
           </div>
