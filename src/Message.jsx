@@ -410,17 +410,17 @@ const Message = React.memo(() => {
               </div>
             </div>
           </div>
-          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[86%] space-y-4 overflow-y-auto p-1 sm:h-[75vh] sm:p-3">
+          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[80vh] space-y-4 overflow-y-auto p-1 sm:h-[69vh] sm:p-3">
             <Chat
               messages={messages}
               activeFriend={activeFriend}
               groupId={groupId}
             />
-            <video ref={localStreamRef}></video>
+            {/* <video ref={localStreamRef}></video> */}
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
-          <div className="fixed bottom-5 row-start-6 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
+          <div className="fixed bottom-0 row-start-6 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
             <form
               onSubmit={sendMessage}
               className="flex justify-center sm:px-3 xl:px-0"
