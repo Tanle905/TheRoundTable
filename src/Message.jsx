@@ -76,7 +76,7 @@ const Message = React.memo(() => {
     iceCandidatePoolSize: 10,
   };
   let pc = new RTCPeerConnection(servers);
-  let localStream= null
+  let localStream = null;
   const [remoteStream, setRemoteStream] = useState(null);
 
   let localStreamRef = useRef(null);
@@ -149,6 +149,7 @@ const Message = React.memo(() => {
     const file = event.target.files[0];
     const fileImagesRef = ref(storage, "files/" + file.name);
     await uploadBytes(fileImagesRef, file).then((snapshot) => {
+      console.log(snapshot.metadata.contentType);
       const fileType = snapshot.metadata.contentType.slice(
         0,
         snapshot.metadata.contentType.indexOf("/")
@@ -179,6 +180,18 @@ const Message = React.memo(() => {
             });
             break;
           }
+          case "audio": {
+            await messagesRef.add({
+              audio: url,
+              fileName: snapshot.metadata.name,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              uid,
+              photoURL,
+              sentFrom: user.uid,
+              sendTo: activeFriend,
+            });
+            break;
+          }
           default: {
             await messagesRef.add({
               file: url,
@@ -199,12 +212,11 @@ const Message = React.memo(() => {
 
   //WebRTC section
   const videoCallHandle = async () => {
-    localStream = 
-      await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      })
-    
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
     setRemoteStream(new MediaStream());
     //Push track from local stram to peer connection
     localStream.getTracks().forEach((track) => {
@@ -410,7 +422,7 @@ const Message = React.memo(() => {
               </div>
             </div>
           </div>
-          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[80vh] space-y-4 overflow-y-auto p-1 sm:h-[69vh] sm:p-3">
+          <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[75vh] space-y-4 overflow-y-auto p-1 sm:h-[69vh] sm:p-3">
             <Chat
               messages={messages}
               activeFriend={activeFriend}
@@ -498,7 +510,7 @@ const Message = React.memo(() => {
         <div className="mx-3">
           <div className="overflow-auto">
             <File
-              files={messages}
+              messages={messages}
               activeFriend={activeFriend}
               groupId={groupId}
             />

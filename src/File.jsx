@@ -3,18 +3,18 @@ import React from "react";
 
 const auth = firebase.auth();
 
-const File = React.memo(({ files, activeFriend, groupId }) => {
-  const filteredImgs =
-    files != null &&
-    files.filter((img) => {
+const File = React.memo(({ messages, activeFriend, groupId }) => {
+  const filteredMessages =
+    messages != null &&
+    messages.filter((message) => {
       if (
-        (activeFriend === img.sendTo &&
-          auth.currentUser.uid === img.sentFrom) ||
-        (activeFriend === img.sentFrom &&
-          auth.currentUser.uid === img.sendTo) ||
-        groupId === img.sendTo
+        (activeFriend === message.sendTo &&
+          auth.currentUser.uid === message.sentFrom) ||
+        (activeFriend === message.sentFrom &&
+          auth.currentUser.uid === message.sendTo) ||
+        groupId === message.sendTo
       )
-        return img;
+        return message;
     });
   function FileRender({ file }) {
     const { image, video } = file;
@@ -51,10 +51,10 @@ const File = React.memo(({ files, activeFriend, groupId }) => {
   }
   return (
     <ul className="flex max-h-60 flex-row-reverse justify-end py-2 sm:max-h-32">
-      {files &&
-        filteredImgs.map((file, index) => {
-          if (filteredImgs.length < 6 || index > filteredImgs.length - 10)
-            return !file.file && <FileRender file={file} key={index} />;
+      {messages &&
+        filteredMessages.map((message, index) => {
+          if (filteredMessages.length < 6 || index > filteredMessages.length - 10)
+            return !message.text && <FileRender file={message} key={index} />;
         })}
     </ul>
   );
