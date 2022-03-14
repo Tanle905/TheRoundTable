@@ -1,13 +1,12 @@
 import moment from "moment";
-import React from "react";
 import firebase from "firebase/compat/app";
+import React from "react";
 import GroupForm from "./GroupForm";
 import { Group } from "./Group";
 import firstTimeGroupImg from "./svg/teammeeting.svg";
 import friendSvg from "./svg/groupImg.svg";
 
 function Friends({
-  auth,
   msg,
   userFriendsCollectionData,
   userFriendsCollectionDataIsLoading,
@@ -22,6 +21,8 @@ function Friends({
   showFriendList,
   setShowFriendList,
 }) {
+  const auth = firebase.auth();
+
   const FriendsList = React.memo((props) => {
     const { friendUid, friendName, friendphotoURL } = props.friends;
     const friendClass =
@@ -115,7 +116,7 @@ function Friends({
           ) : (
             <div className="flex flex-col place-content-center h-[30vh] overflow-auto">
               <img src={friendSvg} className="mx-auto h-3 w-3" />
-              <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <h1 className="px-2 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                 You do not have any friend. Let's make some!!!
               </h1>
             </div>
@@ -172,7 +173,7 @@ function Friends({
             />
           ) : (
             <div className="flex flex-col place-content-center">
-              <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
+              <img src={firstTimeGroupImg} className="mx-auto h-2/4 w-2/4" />
               <h1 className="px-2 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                 You do not have any group. Let's create one!!!
               </h1>
@@ -182,7 +183,7 @@ function Friends({
                   e.preventDefault();
                   setShowGroupForm(!showGroupForm);
                 }}
-                className="m-10 mx-20 rounded-lg bg-blue-600 p-2 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
+                className="m-5 mx-20 rounded-lg bg-blue-600 p-2 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
               >
                 Add Group
               </button>

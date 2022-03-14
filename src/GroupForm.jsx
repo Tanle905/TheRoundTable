@@ -3,12 +3,7 @@ import { useState } from "react";
 import { Fragment } from "react/cjs/react.production.min";
 import { addGroup } from "./Group";
 
-export default function GroupForm({
-  state,
-  setState,
-  friends,
-  userId,
-}) {
+export default function GroupForm({ state, setState, friends, userId }) {
   const [groupName, setGroupName] = useState("");
   const [selectedFriends, setSelectedFriends] = useState([userId]);
   const handleSelectedFriends = (friend) => {
@@ -49,11 +44,7 @@ export default function GroupForm({
           leaveTo="-translate-y-full"
         >
           <div className="fixed inset-x-10 inset-y-52 h-fit max-w-xs rounded-xl bg-white sm:inset-x-52">
-            <form
-              onSubmit={(e) =>
-                addGroup(e, groupName, setGroupName, selectedFriends, friends)
-              }
-            >
+            <form>
               <div className="overflow-hidden rounded-xl shadow-lg">
                 <div className="px-4 py-5">
                   <label
@@ -78,29 +69,36 @@ export default function GroupForm({
                     <div className="flex max-h-32 flex-col overflow-auto md:max-h-60">
                       {friends &&
                         friends.map((friend, index) => {
-                          return (
-                            <label
-                              htmlFor=""
-                              key={index}
-                              onClick={() => handleSelectedFriends(friend)}
-                            >
-                              <input
-                                type="checkbox"
-                                name="friend-name"
-                                className="m-2 transition-all"
-                              />
-                              {friend.friendName}
-                            </label>
-                          );
+                          if (friend.friendUid !== userId)
+                            return (
+                              <label htmlFor="" key={index}>
+                                <input
+                                  type="checkbox"
+                                  name="friend-name"
+                                  className="m-2 transition-all"
+                                  onClick={() => handleSelectedFriends(friend)}
+                                />
+                                {friend.friendName}
+                              </label>
+                            );
                         })}
                     </div>
                   </div>
                 </div>
                 <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                   <button
-                    type="submit"
                     className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    onClick={()=> groupName != "" && setState(false)}
+                    onClick={(e) => {
+                      e.preventDefault
+                      addGroup(
+                        e,
+                        groupName,
+                        setGroupName,
+                        selectedFriends,
+                        friends
+                      );
+                      groupName != "" && setState(false);
+                    }}
                   >
                     Save
                   </button>

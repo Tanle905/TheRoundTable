@@ -14,7 +14,7 @@ const File = React.memo(({ messages, activeFriend, groupId }) => {
           auth.currentUser.uid === message.sendTo) ||
         groupId === message.sendTo
       )
-        return message;
+        return !message.text && !message.audio &&  message;
     });
   function FileRender({ file }) {
     const { image, video } = file;
@@ -54,7 +54,7 @@ const File = React.memo(({ messages, activeFriend, groupId }) => {
       {messages &&
         filteredMessages.map((message, index) => {
           if (filteredMessages.length < 6 || index > filteredMessages.length - 10)
-            return !message.text && <FileRender file={message} key={index} />;
+            return <FileRender file={message} key={index} />;
         })}
     </ul>
   );

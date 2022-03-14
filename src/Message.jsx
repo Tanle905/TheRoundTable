@@ -348,7 +348,6 @@ const Message = React.memo(() => {
               </svg>
               {
                 <SlideOver
-                  auth={auth}
                   addfriend={addfriend}
                   uidValue={uidValue}
                   messages={messages}
