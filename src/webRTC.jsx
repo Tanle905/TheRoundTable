@@ -1,16 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import React from "react";
+import firebase from "firebase/compat/app";
 
 //WebRTC
-function RTC() {
-  //2. Create an offer
+const RTC = React.memo(({
+  pc,
+  setPc,
+  localStream,
+  remoteStream,
+  localStreamRef,
+  remoteStreamRef,
+  activeFriend,
+}) => {
+  //Reference firestore collection
+  const callDoc = firebase.firestore().collection("calls").doc();
+  const offerCandidates = callDoc.collection("offerCandidates");
+  const answerCandidates = callDoc.collection("answerCandidates");
+
+  var callInput = callDoc.id;
   const startCalling = async () => {
-    //Reference firestore collection
-    const callDoc = firebase.firestore().collection("calls").doc();
-    const offerCandidates = callDoc.collection("offerCandidates");
-    const answerCandidates = callDoc.collection("answerCandidates");
-
-    var callInput = callDoc.id;
-
     //Get candidates for caller, save to db
     pc.onicecandidate = (event) => {
       event.candidate && offerCandidates.add(event.candidate.toJSON());
@@ -24,7 +31,7 @@ function RTC() {
       type: offerDescription.type,
     };
 
-    await callDoc.set({ offer });
+    await callDoc.set({ offer, userUID: activeFriend });
 
     //Listen for remote answer
     callDoc.onSnapshot((snapshot) => {
@@ -34,14 +41,14 @@ function RTC() {
         pc.setRemoteDescription(answerDescription);
       }
 
-      //When answered, add candidate to peer connection
-      answerCandidates.onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            const candidate = new RTCIceCandidate(change.doc.data());
-            pc.addIceCandidate(candidate);
-          }
-        });
+    });
+    //When answered, add candidate to peer connection
+    answerCandidates.onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const candidate = new RTCIceCandidate(change.doc.data());
+          pc.addIceCandidate(candidate);
+        }
       });
     });
     console.log("working");
@@ -80,5 +87,13 @@ function RTC() {
       });
     });
   };
-}
-//END OF WebRTC
+  startCalling();
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <video ref={localStreamRef}></video>
+      <video src={remoteStreamRef}></video>
+    </div>
+  );
+});
+
+export default RTC;

@@ -3,6 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import Friends from "./Friends";
 
 export default function SlideOver({
+  auth,
   addfriend,
   uidValue,
   userFriendsCollectionData,
@@ -19,7 +20,7 @@ export default function SlideOver({
   showFriendList,
   setShowFriendList,
 }) {
-  let focusRef = useRef()
+  let focusRef = useRef();
   return (
     <Transition.Root show={showFriendList} as={Fragment}>
       <Dialog
@@ -54,7 +55,10 @@ export default function SlideOver({
                 <div className="flex h-full flex-col bg-gray-50 py-5 shadow-xl dark:bg-slate-900">
                   <div>
                     <div className="flex border-b-2 border-gray-200 px-4 dark:border-slate-800">
-                      <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200" ref={focusRef}>
+                      <h1
+                        className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200"
+                        ref={focusRef}
+                      >
                         Friends
                       </h1>
                       <form className="group relative ml-auto py-3 sm:mr-2">
@@ -113,6 +117,7 @@ export default function SlideOver({
                       </form>
                     </div>
                     <Friends
+                      auth={auth}
                       msg={messages}
                       userFriendsCollectionData={userFriendsCollectionData}
                       userFriendsCollectionDataIsLoading={

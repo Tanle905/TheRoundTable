@@ -2,7 +2,7 @@ import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import File from "./File";
 
-export default function Example({
+export default function SlideOver2({
   messages,
   activeFriend,
   groupId,
@@ -47,7 +47,7 @@ export default function Example({
                     <div className="mx-3">
                       <div className="overflow-auto">
                         <File
-                          files={messages}
+                          messages={messages}
                           activeFriend={activeFriend}
                           groupId={groupId}
                         />

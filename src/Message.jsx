@@ -9,6 +9,7 @@ import SlideOver2 from "./SlideOver2";
 import Chat from "./Chat";
 import File from "./File";
 import Friends from "./Friends";
+import RTC from "./webRTC";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -49,6 +50,7 @@ const Message = React.memo(() => {
   const [messageValue, setMessageValue] = useState("");
   const messagesQuery = messagesRef.orderBy("createdAt").limit(50);
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
+  let currentMessageRef = useRef();
   /*END OF Init and Variables Section*/
 
   //Group init and variables
@@ -75,10 +77,10 @@ const Message = React.memo(() => {
     ],
     iceCandidatePoolSize: 10,
   };
-  let pc = new RTCPeerConnection(servers);
+  const [pc, setPc] = useState(new RTCPeerConnection(servers));
   let localStream = null;
-  const [remoteStream, setRemoteStream] = useState(null);
-
+  let remoteStream = null;
+  const [isCalling, setIsCalling] = useState(false);
   let localStreamRef = useRef(null);
   let remoteStreamRef = useRef(null);
   //End of WebRTC init and variables
@@ -137,6 +139,11 @@ const Message = React.memo(() => {
         sendTo: activeFriend,
       });
       setMessageValue("");
+      currentMessageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start",
+      });
     }
   };
   //END OF Chat section
@@ -206,6 +213,11 @@ const Message = React.memo(() => {
         }
       });
     });
+    currentMessageRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
   };
   //END OF fileHandle section
 
@@ -216,7 +228,7 @@ const Message = React.memo(() => {
       audio: true,
     });
 
-    setRemoteStream(new MediaStream());
+    remoteStream = new MediaStream();
     //Push track from local stram to peer connection
     localStream.getTracks().forEach((track) => {
       pc.addTrack(track, localStream);
@@ -232,6 +244,8 @@ const Message = React.memo(() => {
     localVideo.srcObject = localStream;
     localVideo.play();
     let remoteVideo = remoteStreamRef.current;
+    remoteVideo.srcObject = remoteStream;
+    remoteVideo.play();
   };
   //End of WebRTC section
 
@@ -296,6 +310,7 @@ const Message = React.memo(() => {
           </form>
         </div>
         <Friends
+          auth={auth}
           msg={messages}
           userFriendsCollectionData={userFriendsCollectionData}
           userFriendsCollectionDataIsLoading={
@@ -333,6 +348,7 @@ const Message = React.memo(() => {
               </svg>
               {
                 <SlideOver
+                  auth={auth}
                   addfriend={addfriend}
                   uidValue={uidValue}
                   messages={messages}
@@ -376,7 +392,13 @@ const Message = React.memo(() => {
                   />
                 </svg>
               </button>
-              <button name="video-call" onClick={videoCallHandle}>
+              <button
+                name="video-call"
+                onClick={() => {
+                  videoCallHandle();
+                  setIsCalling(!isCalling);
+                }}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-8 w-8 transition hover:-translate-y-1"
@@ -427,7 +449,18 @@ const Message = React.memo(() => {
               activeFriend={activeFriend}
               groupId={groupId}
             />
-            {/* <video ref={localStreamRef}></video> */}
+            <div ref={currentMessageRef}></div>
+            {isCalling && (
+              <RTC
+                pc={pc}
+                setPc={setPc}
+                localStream={localStream}
+                remoteStream={remoteStream}
+                localStreamRef={localStreamRef}
+                remoteStreamRef={remoteStreamRef}
+                activeFriend={activeFriend}
+              />
+            )}
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (

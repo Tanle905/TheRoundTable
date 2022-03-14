@@ -6,9 +6,8 @@ import { Group } from "./Group";
 import firstTimeGroupImg from "./svg/teammeeting.svg";
 import friendSvg from "./svg/groupImg.svg";
 
-const auth = firebase.auth();
-
 function Friends({
+  auth,
   msg,
   userFriendsCollectionData,
   userFriendsCollectionDataIsLoading,
@@ -23,7 +22,7 @@ function Friends({
   showFriendList,
   setShowFriendList,
 }) {
-  const FriendsList = React.memo(function FriendsList(props) {
+  const FriendsList = React.memo((props) => {
     const { friendUid, friendName, friendphotoURL } = props.friends;
     const friendClass =
       friendUid === activeFriend ? "friend-active" : "friend-inactive";
@@ -62,7 +61,7 @@ function Friends({
             alt=""
           />
           <div className="col-span-7 flex-col text-gray-800 dark:text-gray-300">
-            <h1 className="text-sm font-medium sm:text-lg">{friendName}</h1>
+            <h1 className="text-sm font-medium sm:text-lg truncate">{friendName}</h1>
             <div className="flex text-xs">
               <span className="mr-2">
                 {filteredMessages && filteredMessages.length !== 0
@@ -114,8 +113,8 @@ function Friends({
               <div className="my-auto h-10 w-10 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75 sm:h-24 sm:w-24"></div>
             </div>
           ) : (
-            <div className="flex flex-col place-content-center">
-              <img src={friendSvg} className="mx-auto h-2/3 w-2/3" />
+            <div className="flex flex-col place-content-center h-[30vh] overflow-auto">
+              <img src={friendSvg} className="mx-auto h-3 w-3" />
               <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
                 You do not have any friend. Let's make some!!!
               </h1>
@@ -174,7 +173,7 @@ function Friends({
           ) : (
             <div className="flex flex-col place-content-center">
               <img src={firstTimeGroupImg} className="mx-auto h-2/3 w-2/3" />
-              <h1 className="px-2 text-center text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <h1 className="px-2 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                 You do not have any group. Let's create one!!!
               </h1>
               <button
@@ -183,7 +182,7 @@ function Friends({
                   e.preventDefault();
                   setShowGroupForm(!showGroupForm);
                 }}
-                className="m-10 rounded-lg bg-blue-600 p-3 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
+                className="m-10 mx-20 rounded-lg bg-blue-600 p-2 font-semibold text-gray-100 transition hover:-translate-y-1 hover:bg-blue-500 hover:text-white dark:bg-indigo-500 dark:hover:bg-indigo-400 2xl:mx-32"
               >
                 Add Group
               </button>
