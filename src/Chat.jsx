@@ -52,7 +52,7 @@ const ChatMessage = React.memo(({ message, activeFriend, groupId }) => {
         {image && (
           <img
             src={image}
-            className="max-h-96 w-60 max-w-xs rounded-xl sm:max-h-80 sm:w-auto xl:max-w-full "
+            className="max-h-96 w-60 max-w-xs rounded-md sm:max-h-80 sm:w-auto xl:max-w-full "
             alt=""
           />
         )}
@@ -60,7 +60,7 @@ const ChatMessage = React.memo(({ message, activeFriend, groupId }) => {
           <video
             controls
             src={video}
-            className="max-h-96 w-60 max-w-xs rounded-xl sm:max-h-80 sm:w-auto xl:max-w-full "
+            className="max-h-96 w-60 max-w-xs rounded-md sm:max-h-80 sm:w-auto xl:max-w-full "
             alt=""
           />
         )}
