@@ -115,7 +115,7 @@ function Friends({
             </div>
           ) : (
             <div className="flex flex-col place-content-center h-[30vh] overflow-auto">
-              <img src={friendSvg} className="mx-auto h-3 w-3" />
+              <img src={friendSvg} className="mx-auto h-2/4 w-2/4" />
               <h1 className="px-2 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                 You do not have any friend. Let's make some!!!
               </h1>
