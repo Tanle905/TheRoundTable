@@ -52,7 +52,7 @@ const ChatMessage = React.memo(({ message, activeFriend, groupId }) => {
         {image && (
           <img
             src={image}
-            className="w-60 rounded-md sm:h-80 sm:w-auto xl:max-w-full "
+            className="w-60 rounded-md sm:h-80 sm:w-auto xl:max-w-2xl "
             alt=""
           />
         )}
