@@ -95,7 +95,7 @@ function Friends({
   return (
     <div>
       <div className="grid grid-rows-3">
-        <ul className="row-span-1 flex h-[41vh] flex-col overflow-auto">
+        <ul className="row-span-1 flex h-[36vh] flex-col overflow-auto">
           <p
             className="my-1 cursor-pointer place-self-center rounded-xl bg-blue-200 p-1 text-gray-800 transition hover:bg-slate-500 dark:bg-slate-700 dark:text-gray-200"
             onClick={() => {
