@@ -23,6 +23,12 @@ code {
   .friend-active {
     @apply bg-gradient-to-r from-blue-300 to-transparent transition dark:bg-gradient-to-r dark:from-indigo-700 dark:to-transparent;
   }
+  .group-inactive {
+    @apply transition hover:bg-gray-100 dark:hover:bg-slate-800;
+  }
+  .group-active{
+    @apply bg-gradient-to-r from-blue-300 to-transparent transition dark:bg-gradient-to-r dark:from-indigo-700 dark:to-transparent;
+  }
   .sent {
     @apply flex-row-reverse justify-start transition;
   }

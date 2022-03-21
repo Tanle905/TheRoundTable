@@ -167,6 +167,7 @@ function Friends({
           {userGroupCollectionData && userGroupCollectionData.length !== 0 ? (
             <Group
               groups={groupsCollectionData}
+              activeGroup={activeFriend}
               setActive={setActiveFriend}
               setGroupId={setGroupId}
               setActiveName={setActiveName}
