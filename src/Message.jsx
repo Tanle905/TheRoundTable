@@ -77,7 +77,7 @@ const Message = React.memo(() => {
     ],
     iceCandidatePoolSize: 10,
   };
-  const [pc, setPc] = useState(new RTCPeerConnection(servers));
+  //const [pc, setPc] = useState(new RTCPeerConnection(servers));
   let localStream = null;
   let remoteStream = null;
   const [isCalling, setIsCalling] = useState(false);

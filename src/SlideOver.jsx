@@ -6,6 +6,7 @@ export default function SlideOver({
   auth,
   addfriend,
   uidValue,
+  setUidValue,
   userFriendsCollectionData,
   userFriendsCollectionDataIsLoading,
   groupsCollectionData,
