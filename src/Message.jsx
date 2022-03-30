@@ -77,8 +77,8 @@ const Message = React.memo(() => {
     ],
     iceCandidatePoolSize: 10,
   };
-  //const [pc, setPc] = useState(new RTCPeerConnection(servers));
-  let localStream = null;
+  const [pc, setPc] = useState(new RTCPeerConnection(servers));
+  var localStream = null;
   let remoteStream = null;
   const [isCalling, setIsCalling] = useState(false);
   let localStreamRef = useRef(null);
@@ -246,12 +246,10 @@ const Message = React.memo(() => {
     });
   };
   //END OF fileHandle section
-
   //WebRTC section
   const videoCallHandle = async () => {
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: true,
     });
 
     remoteStream = new MediaStream();
@@ -266,12 +264,6 @@ const Message = React.memo(() => {
         remoteStream.addTrack(track);
       });
     };
-    let localVideo = localStreamRef.current;
-    localVideo.srcObject = localStream;
-    localVideo.play();
-    let remoteVideo = remoteStreamRef.current;
-    remoteVideo.srcObject = remoteStream;
-    remoteVideo.play();
   };
   //End of WebRTC section
 
@@ -423,9 +415,13 @@ const Message = React.memo(() => {
                     </button>
                     <button
                       name="video-call"
-                      onClick={() => {
-                        videoCallHandle();
+                      onClick={async () => {
+                        await videoCallHandle();
                         setIsCalling(!isCalling);
+                        let localVideo = localStreamRef.current;
+                        let remoteVideo = remoteStreamRef.current;
+                        localVideo.srcObject = localStream;
+                        remoteVideo.srcObject = remoteStream;
                       }}
                     >
                       <svg
@@ -485,8 +481,6 @@ const Message = React.memo(() => {
               <RTC
                 pc={pc}
                 setPc={setPc}
-                localStream={localStream}
-                remoteStream={remoteStream}
                 localStreamRef={localStreamRef}
                 remoteStreamRef={remoteStreamRef}
                 activeFriend={activeFriend}
