@@ -375,6 +375,7 @@ const Message = React.memo(() => {
               {
                 <SlideOver
                   addfriend={addfriend}
+                  setUidValue={setUidValue}
                   uidValue={uidValue}
                   messages={messages}
                   userFriendsCollectionData={userFriendsCollectionData}
