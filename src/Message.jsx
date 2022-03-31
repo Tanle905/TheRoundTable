@@ -99,27 +99,29 @@ const Message = React.memo(() => {
         userFriendsCollectionData[0].friendName
     );
   }, [userFriendsCollectionData]);
-  const addfriend = (event) => {
-    event.preventDefault();
+
+  const addfriend = (e) => {
+    e.preventDefault();
     if (!usersDataLoading && userRef) {
-      usersCollectionData.forEach((element) => {
+      usersCollectionData.forEach(async (element) => {
         if (element.uid === uidValue) {
-          userFriendRef.doc(uidValue).set({
+          await userFriendRef.doc(uidValue).set({
             friendEmail: element.email,
             friendName: element.name,
             friendUid: element.uid,
             friendphotoURL: element.photoURL,
           });
-          userRef.doc(uidValue).collection("friends").doc(user.uid).set({
+          await userRef.doc(uidValue).collection("friends").doc(user.uid).update({
             friendEmail: user.email,
             friendName: user.displayName,
             friendUid: user.uid,
             friendphotoURL: user.photoURL,
           });
-          userRef.doc(activeFriend).collection("friends").doc(user.uid).update({
+          console.log(e)
+          await userRef.doc(uidValue).collection("friends").doc(user.uid).update({
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
-          userFriendRef.doc(activeFriend).update({
+          await userFriendRef.doc(uidValue).update({
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
         }
