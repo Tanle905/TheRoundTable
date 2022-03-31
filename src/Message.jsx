@@ -111,17 +111,16 @@ const Message = React.memo(() => {
             friendUid: element.uid,
             friendphotoURL: element.photoURL,
           });
-          await userRef.doc(uidValue).collection("friends").doc(user.uid).update({
+          await userRef.doc(uidValue).collection("friends").doc(user.uid).set({
             friendEmail: user.email,
             friendName: user.displayName,
             friendUid: user.uid,
             friendphotoURL: user.photoURL,
           });
-          console.log(e)
           await userRef.doc(uidValue).collection("friends").doc(user.uid).update({
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
-          await userFriendRef.doc(uidValue).update({
+           userFriendRef.doc(uidValue).update({
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
         }
