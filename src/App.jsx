@@ -5,7 +5,7 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import SignIn from "./SignIn";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData, useDocumentData } from "react-firebase-hooks/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 
 const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
@@ -21,7 +21,9 @@ const App = () => {
   const auth = firebase.auth();
   const [user, authLoading] = useAuthState(auth);
   const userRef = firebase.firestore().collection("users");
-
+  const userDocRef =
+    user && firebase.firestore().collection("users").doc(user.uid);
+  const [userDocumentData] = useDocumentData(userDocRef);
   const addUser = () => {
     if (!authLoading) {
       userRef.doc(user.uid).set({
@@ -35,23 +37,28 @@ const App = () => {
 
   let someThing;
   if (user && !authLoading) {
-    addUser();
-    someThing = (
-      <div className="h-screen overflow-hidden">
-        <Header />
-        <Message />
-      </div>
-    );
+    if (userDocumentData !== undefined && !userDocumentData.banned) {
+      addUser();
+      someThing = (
+        <div className="h-screen overflow-hidden">
+          <Header />
+          <Message />
+        </div>
+      );
+    }else if(userDocumentData !== undefined){
+      alert('you have been banned')
+      auth.signOut()
+      someThing = <SignIn />;
+    }
   } else if (!user && !authLoading) {
     someThing = <SignIn />;
   } else {
     someThing = (
-      <div className="h-screen bg-gray-50 dark:bg-slate-900 flex place-content-center">
-        <div className="animate-bounce my-auto w-24 h-24 bg-blue-500 dark:bg-indigo-500 rounded-lg shadow-2xl dark:shadow-indigo-800/75"></div>
+      <div className="flex h-screen place-content-center bg-gray-50 dark:bg-slate-900">
+        <div className="my-auto h-24 w-24 animate-bounce rounded-lg bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75"></div>
       </div>
     );
   }
-
   return <div>{someThing}</div>;
 };
 

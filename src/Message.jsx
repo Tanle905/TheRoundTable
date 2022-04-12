@@ -395,7 +395,7 @@ const Message = React.memo(() => {
               </p>
             </div>
             <div className="my-auto  mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
-              {userFriendsCollectionData &&
+              {/* {userFriendsCollectionData &&
                 userFriendsCollectionData.length !== 0 && (
                   <React.Fragment>
                     <button>
@@ -441,7 +441,7 @@ const Message = React.memo(() => {
                       </svg>
                     </button>
                   </React.Fragment>
-                )}
+                )} */}
               <div className="place-self-end truncate overflow-ellipsis p-1 text-lg sm:text-3xl lg:hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

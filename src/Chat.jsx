@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import firebase from "firebase/compat/app";
 import moment from "moment";
 
@@ -27,7 +27,7 @@ const ChatMessage = React.memo(({ message, activeFriend, groupId }) => {
     sentFrom,
     createdAt,
   } = message;
-  const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
+  const messageClass = auth!==null && uid === auth.currentUser.uid ? "sent" : "received";
   const date =
     createdAt != null && moment(createdAt.toDate()).locale("vi").format("lll");
   if (
