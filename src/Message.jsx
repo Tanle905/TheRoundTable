@@ -110,22 +110,16 @@ const Message = React.memo(() => {
             friendName: element.name,
             friendUid: element.uid,
             friendphotoURL: element.photoURL,
+            isFriend: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           await userRef.doc(uidValue).collection("friends").doc(user.uid).set({
             friendEmail: user.email,
             friendName: user.displayName,
             friendUid: user.uid,
             friendphotoURL: user.photoURL,
-          });
-          await userRef
-            .doc(uidValue)
-            .collection("friends")
-            .doc(user.uid)
-            .update({
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-          userFriendRef.doc(uidValue).update({
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isFriend: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
       });
@@ -337,6 +331,10 @@ const Message = React.memo(() => {
         <Friends
           auth={auth}
           msg={messages}
+          usersCollectionData={usersCollectionData}
+          usersDataLoading={usersDataLoading}
+          userRef={userRef}
+          userFriendRef={userFriendRef}
           userFriendsCollectionData={userFriendsCollectionData}
           userFriendsCollectionDataIsLoading={
             userFriendsCollectionDataIsLoading
@@ -377,6 +375,10 @@ const Message = React.memo(() => {
                   setUidValue={setUidValue}
                   uidValue={uidValue}
                   messages={messages}
+                  usersDataLoading={usersDataLoading}
+                  usersCollectionData={usersCollectionData}
+                  userRef={userRef}
+                  userFriendRef={userFriendRef}
                   userFriendsCollectionData={userFriendsCollectionData}
                   userFriendsCollectionDataIsLoading={
                     userFriendsCollectionDataIsLoading
