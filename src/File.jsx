@@ -4,8 +4,8 @@ import React from "react";
 const auth = firebase.auth();
 
 function FileRender({ file }) {
-  const { image, video } = file;
-  return (
+  const { image, video, deleted } = file;
+  return !deleted && (
     <li className="mx-1">
       <a
         className="cursor-pointer"

@@ -22,7 +22,6 @@ function Friends({
   setShowFriendList,
 }) {
   const auth = firebase.auth();
-
   const FriendsList = React.memo((props) => {
     const { friendUid, friendName, friendphotoURL } = props.friends;
     const friendClass =
@@ -50,6 +49,9 @@ function Friends({
       filteredMessages.length !== 0 &&
       filteredMessages[filteredMessages.length - 1].createdAt != null &&
       filteredMessages[filteredMessages.length - 1].createdAt.toDate();
+    console.log(
+      filteredMessages && filteredMessages[filteredMessages.length - 1]
+    );
     return (
       <li
         className={`group transition ${friendClass} `}
@@ -62,7 +64,9 @@ function Friends({
             alt=""
           />
           <div className="col-span-7 flex-col text-gray-800 dark:text-gray-300">
-            <h1 className="text-sm font-medium sm:text-lg truncate">{friendName}</h1>
+            <h1 className="truncate text-sm font-medium sm:text-lg">
+              {friendName}
+            </h1>
             <div className="flex text-xs">
               <span className="mr-2">
                 {filteredMessages && filteredMessages.length !== 0
@@ -74,11 +78,24 @@ function Friends({
               </span>
               {filteredMessages &&
               filteredMessages.length !== 0 &&
-              filteredMessages[filteredMessages.length - 1].text
-                ? <p className="truncate text-ellipsis">{filteredMessages[filteredMessages.length - 1].text}</p>
-                : filteredMessages &&
-                  filteredMessages.length !== 0 &&
-                  "sent a file"}
+              !filteredMessages[filteredMessages.length - 1].deleted &&
+              filteredMessages[filteredMessages.length - 1].text ? (
+                <p className="truncate text-ellipsis">
+                  {filteredMessages[filteredMessages.length - 1].text}
+                </p>
+              ) : filteredMessages &&
+                filteredMessages.length !== 0 &&
+                !filteredMessages[filteredMessages.length - 1].deleted ? (
+                filteredMessages &&
+                filteredMessages.length !== 0 &&
+                "sent a file"
+              ) : filteredMessages &&
+                filteredMessages.length !== 0 &&
+                filteredMessages[filteredMessages.length - 1].deleted ? (
+                "deleted a message"
+              ) : (
+                ""
+              )}
             </div>
           </div>
           <div className="col-span-2 mr-auto text-gray-700 dark:text-gray-200">
@@ -114,7 +131,7 @@ function Friends({
               <div className="my-auto h-10 w-10 animate-bounce rounded-full bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75 sm:h-24 sm:w-24"></div>
             </div>
           ) : (
-            <div className="flex flex-col place-content-center h-[30vh] overflow-auto">
+            <div className="flex h-[30vh] flex-col place-content-center overflow-auto">
               <img src={friendSvg} className="mx-auto h-2/4 w-2/4" />
               <h1 className="px-2 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                 You do not have any friend. Let's make some!!!

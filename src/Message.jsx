@@ -117,10 +117,14 @@ const Message = React.memo(() => {
             friendUid: user.uid,
             friendphotoURL: user.photoURL,
           });
-          await userRef.doc(uidValue).collection("friends").doc(user.uid).update({
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-           userFriendRef.doc(uidValue).update({
+          await userRef
+            .doc(uidValue)
+            .collection("friends")
+            .doc(user.uid)
+            .update({
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          userFriendRef.doc(uidValue).update({
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
         }
@@ -136,14 +140,16 @@ const Message = React.memo(() => {
   const sendMessage = async (e) => {
     e.preventDefault();
     if (messageValue !== "") {
-      const { uid, photoURL } = auth.currentUser;
-      messagesRef.doc().set({
+      const { photoURL } = auth.currentUser;
+      const msgId = messagesRef.doc().id;
+      messagesRef.doc(msgId).set({
         text: messageValue,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        uid,
+        id: msgId,
         photoURL,
         sentFrom: user.uid,
         sendTo: activeFriend,
+        deleted:false
       });
       setMessageValue("");
       await userFriendRef.doc(activeFriend).update({
@@ -476,6 +482,7 @@ const Message = React.memo(() => {
               messages={messages}
               activeFriend={activeFriend}
               groupId={groupId}
+              messagesRef={messagesRef}
             />
             <div ref={currentMessageRef}></div>
             {isCalling && (
