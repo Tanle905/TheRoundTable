@@ -47,7 +47,7 @@ const File = React.memo(({ messages, activeFriend, groupId }) => {
           auth.currentUser.uid === message.sendTo) ||
         groupId === message.sendTo
       )
-        return !message.text && !message.audio &&  message;
+        return !message.text && !message.audio && !message.file &&  message;
     });
   return (
     <ul className="flex max-h-60 flex-row-reverse justify-end py-2 sm:max-h-32">
