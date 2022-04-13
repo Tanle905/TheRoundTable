@@ -49,9 +49,6 @@ function Friends({
       filteredMessages.length !== 0 &&
       filteredMessages[filteredMessages.length - 1].createdAt != null &&
       filteredMessages[filteredMessages.length - 1].createdAt.toDate();
-    console.log(
-      filteredMessages && filteredMessages[filteredMessages.length - 1]
-    );
     return (
       <li
         className={`group transition ${friendClass} `}
