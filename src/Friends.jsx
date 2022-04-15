@@ -8,10 +8,6 @@ import friendSvg from "./svg/groupImg.svg";
 
 function Friends({
   msg,
-  usersCollectionData,
-  usersDataLoading,
-  userRef,
-  userFriendRef,
   userFriendsCollectionData,
   userFriendsCollectionDataIsLoading,
   groupsCollectionData,
@@ -35,21 +31,6 @@ function Friends({
       setActiveName(friendName);
       setGroupId(null);
     };
-    const removeFriendHandle = ()=>{
-      if (!usersDataLoading && userRef) {
-        usersCollectionData.forEach(async (element) => {
-          if (element.uid === friendUid) {
-            await userFriendRef.doc(friendUid).set({
-              isFriend: false,
-            });
-            await userRef.doc(friendUid).collection("friends").doc(auth.currentUser.uid).set({
-              isFriend: false,
-            });
-          }
-        });
-      }
-    }
-
     const filteredMessages =
       friendUid &&
       props.msg &&
@@ -69,7 +50,7 @@ function Friends({
       filteredMessages[filteredMessages.length - 1].createdAt.toDate();
     return isFriend ? (
       <li
-        className={`group transition ${friendClass} `}
+        className={`group transition ${friendClass} group`}
         onClick={friendRefHandle}
       >
         <div className="grid grid-cols-10 space-x-2 rounded-lg p-2 transition-all hover:cursor-pointer focus:bg-gray-200">
@@ -78,7 +59,7 @@ function Friends({
             src={friendphotoURL}
             alt=""
           />
-          <div className="col-span-6 flex-col text-gray-800 dark:text-gray-300">
+          <div className="col-span-7 flex-col text-gray-800 dark:text-gray-300">
             <h1 className="truncate text-sm font-medium sm:text-lg">
               {friendName}
             </h1>
@@ -87,9 +68,9 @@ function Friends({
                 {filteredMessages && filteredMessages.length !== 0
                   ? filteredMessages[filteredMessages.length - 1].uid ===
                     friendUid
-                    ? ""
+                    ? null
                     : "You:"
-                  : ""}
+                  : null}
               </span>
               {filteredMessages &&
               filteredMessages.length !== 0 &&
@@ -109,7 +90,7 @@ function Friends({
                 filteredMessages[filteredMessages.length - 1].deleted ? (
                 "deleted a message"
               ) : (
-                ""
+                "No message recently"
               )}
             </div>
           </div>
@@ -120,24 +101,7 @@ function Friends({
                 moment(latestMessages).startOf("minute").fromNow()}
             </p>
           </div>
-          <span 
-          onClick={()=>removeFriendHandle()}
-          className="col-span-1 my-auto dark:text-indigo-500 hover:text-indigo-400">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
-              />
-            </svg>
-          </span>
+          
         </div>
       </li>
     ) : (

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import firebase from "firebase/compat/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useCollectionData } from "react-firebase-hooks/firestore";
+import { useCollectionData, useDocument } from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import SlideOver from "./SlideOver";
@@ -9,6 +9,7 @@ import SlideOver2 from "./SlideOver2";
 import Chat from "./Chat";
 import File from "./File";
 import Friends from "./Friends";
+import Dropdown from "./Dropdown";
 import RTC from "./webRTC";
 
 const Message = React.memo(() => {
@@ -29,6 +30,7 @@ const Message = React.memo(() => {
   const [user] = useAuthState(auth);
   const userRef = firebase.firestore().collection("users");
   const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
+  const usersId = usersCollectionData && usersCollectionData.map(user=> user.uid)
 
   //fileHandle init and variables
   const storage = getStorage(firebaseApp);
@@ -65,24 +67,24 @@ const Message = React.memo(() => {
   //End of group init and variables
 
   //WebRTC init and variables
-  const servers = {
-    iceservers: [
-      {
-        urls: [
-          "stun.l.google.com:19302",
-          "stun3.l.google.com:19302",
-          "stunserver.org",
-        ],
-      },
-    ],
-    iceCandidatePoolSize: 10,
-  };
-  const [pc, setPc] = useState(new RTCPeerConnection(servers));
-  var localStream = null;
-  let remoteStream = null;
-  const [isCalling, setIsCalling] = useState(false);
-  let localStreamRef = useRef(null);
-  let remoteStreamRef = useRef(null);
+  // const servers = {
+  //   iceservers: [
+  //     {
+  //       urls: [
+  //         "stun.l.google.com:19302",
+  //         "stun3.l.google.com:19302",
+  //         "stunserver.org",
+  //       ],
+  //     },
+  //   ],
+  //   iceCandidatePoolSize: 10,
+  // };
+  // const [pc, setPc] = useState(new RTCPeerConnection(servers));
+  // var localStream = null;
+  // let remoteStream = null;
+  // const [isCalling, setIsCalling] = useState(false);
+  // let localStreamRef = useRef(null);
+  // let remoteStreamRef = useRef(null);
   //End of WebRTC init and variables
 
   /*Component Section*/
@@ -111,7 +113,7 @@ const Message = React.memo(() => {
             friendUid: element.uid,
             friendphotoURL: element.photoURL,
             isFriend: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
           await userRef.doc(uidValue).collection("friends").doc(user.uid).set({
             friendEmail: user.email,
@@ -119,14 +121,31 @@ const Message = React.memo(() => {
             friendUid: user.uid,
             friendphotoURL: user.photoURL,
             isFriend: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
         }
       });
       setUidValue("");
     }
   };
-
+  const removeFriendHandle = () => {
+    if (!usersDataLoading && userRef) {
+      usersCollectionData.forEach(async (element) => {
+        if (element.uid === activeFriend) {
+          await userFriendRef.doc(activeFriend).set({
+            isFriend: false,
+          });
+          await userRef
+            .doc(activeFriend)
+            .collection("friends")
+            .doc(auth.currentUser.uid)
+            .set({
+              isFriend: false,
+            });
+        }
+      });
+    }
+  };
   //END OF Friends Section ( FriendsList and addFriend)
 
   //Chat section
@@ -143,7 +162,7 @@ const Message = React.memo(() => {
         photoURL,
         sentFrom: user.uid,
         sendTo: activeFriend,
-        deleted:false
+        deleted: false,
       });
       setMessageValue("");
       await userFriendRef.doc(activeFriend).update({
@@ -248,24 +267,24 @@ const Message = React.memo(() => {
   };
   //END OF fileHandle section
   //WebRTC section
-  const videoCallHandle = async () => {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-    });
+  // const videoCallHandle = async () => {
+  //   localStream = await navigator.mediaDevices.getUserMedia({
+  //     video: true,
+  //   });
 
-    remoteStream = new MediaStream();
-    //Push track from local stram to peer connection
-    localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream);
-    });
+  //   remoteStream = new MediaStream();
+  //   //Push track from local stram to peer connection
+  //   localStream.getTracks().forEach((track) => {
+  //     pc.addTrack(track, localStream);
+  //   });
 
-    //Pull tracks from remote stream, add to video stream
-    pc.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
-      });
-    };
-  };
+  //   //Pull tracks from remote stream, add to video stream
+  //   pc.ontrack = (event) => {
+  //     event.streams[0].getTracks().forEach((track) => {
+  //       remoteStream.addTrack(track);
+  //     });
+  //   };
+  // };
   //End of WebRTC section
 
   /*END OF Component Section*/
@@ -331,10 +350,6 @@ const Message = React.memo(() => {
         <Friends
           auth={auth}
           msg={messages}
-          usersCollectionData={usersCollectionData}
-          usersDataLoading={usersDataLoading}
-          userRef={userRef}
-          userFriendRef={userFriendRef}
           userFriendsCollectionData={userFriendsCollectionData}
           userFriendsCollectionDataIsLoading={
             userFriendsCollectionDataIsLoading
@@ -375,10 +390,6 @@ const Message = React.memo(() => {
                   setUidValue={setUidValue}
                   uidValue={uidValue}
                   messages={messages}
-                  usersDataLoading={usersDataLoading}
-                  usersCollectionData={usersCollectionData}
-                  userRef={userRef}
-                  userFriendRef={userFriendRef}
                   userFriendsCollectionData={userFriendsCollectionData}
                   userFriendsCollectionDataIsLoading={
                     userFriendsCollectionDataIsLoading
@@ -402,7 +413,53 @@ const Message = React.memo(() => {
                 {activeName}
               </p>
             </div>
-            <div className="my-auto  mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
+            <div className="relative my-auto mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
+              {userFriendsCollectionData &&
+                userFriendsCollectionData.length !== 0 &&
+                usersId.includes(activeFriend) ? (
+                  <Dropdown
+                    host={
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="my-auto h-7 w-7"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+                        />
+                      </svg>
+                    }
+                    position="top-5"
+                    contents={{
+                      options: [
+                        <div className="flex space-x-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                            />
+                          </svg>
+                          <p onClick={() => removeFriendHandle()}>
+                            Remove Friend
+                          </p>
+                        </div>,
+                      ],
+                    }}
+                  />
+                ): ''}
               {/* {userFriendsCollectionData &&
                 userFriendsCollectionData.length !== 0 && (
                   <React.Fragment>
@@ -487,7 +544,7 @@ const Message = React.memo(() => {
               messagesRef={messagesRef}
             />
             <div ref={currentMessageRef}></div>
-            {isCalling && (
+            {/* {isCalling && (
               <RTC
                 pc={pc}
                 setPc={setPc}
@@ -495,7 +552,7 @@ const Message = React.memo(() => {
                 remoteStreamRef={remoteStreamRef}
                 activeFriend={activeFriend}
               />
-            )}
+            )} */}
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
@@ -605,7 +662,7 @@ const Message = React.memo(() => {
           </svg>
           <p>Members</p>
         </div>
-        <ul className="mt-3 max-h-96 space-y-2 overflow-auto">
+        <ul className="mt-3 h-[64vh] space-y-2 overflow-auto">
           {groupsCollectionData?.map((group) => {
             return (
               group?.groupId === groupId &&

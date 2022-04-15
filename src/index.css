@@ -35,6 +35,12 @@ code {
   .sent {
     @apply flex-row-reverse justify-start transition;
   }
+  .sent .color{
+    @apply bg-blue-500 dark:bg-indigo-600
+  }
+  .received .color{
+    @apply bg-gray-500 dark:bg-gray-700 
+  }
   .received {
     @apply justify-start transition;
   }

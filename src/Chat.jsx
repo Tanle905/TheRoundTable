@@ -48,14 +48,16 @@ const ChatMessage = React.memo(
       groupId === sendTo
     ) {
       return !deleted ? (
-        <div className={`flex space-x-2 space-y-2 ${messageClass} `}>
+        <div className={`flex space-x-2 space-y-2 ${messageClass} group`}>
           <img
-            className={`mb-1 mt-auto h-6 w-6 rounded-full ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
+            className={`mb-1 mt-auto h-4 w-4 rounded-full ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
             src={photoURL}
             alt=""
           />
           {text ? (
-            <p className="max-w-[15rem] rounded-xl bg-blue-500 p-2 py-1 dark:bg-indigo-500 sm:max-w-xl">
+            <p
+              className={`max-w-[15rem] rounded-md p-2 py-1 sm:max-w-xl ${messageClass} color`}
+            >
               {text}
             </p>
           ) : (
@@ -77,7 +79,9 @@ const ChatMessage = React.memo(
             />
           )}
           {file && (
-            <div className="flex w-60 rounded-md bg-blue-500 p-2 text-gray-100 dark:bg-indigo-600">
+            <div
+              className={`flex w-60 rounded-md p-2 text-gray-100 ${messageClass} color`}
+            >
               <p className="mr-3 truncate text-center text-sm">{fileName}</p>
               <div
                 className="cursor-pointer rounded-md bg-gray-200 p-1 transition hover:-translate-y-0.5 hover:bg-gray-300"
@@ -101,7 +105,9 @@ const ChatMessage = React.memo(
             </div>
           )}
           {audio && (
-            <div className="w-64 rounded-md bg-blue-500 p-2 pb-0 text-gray-100 dark:bg-indigo-600">
+            <div
+              className={`w-64 rounded-md p-2 pb-0 text-gray-100 ${messageClass} color`}
+            >
               <p className="truncate text-sm">{fileName}</p>
               <audio controls className="w-full py-2">
                 <source src={audio} />
@@ -111,7 +117,7 @@ const ChatMessage = React.memo(
           {messageClass === "sent" && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 cursor-pointer self-center text-gray-800 transition hover:-translate-y-0.5 dark:text-gray-400"
+              className="h-5 w-5 cursor-pointer self-center text-gray-800 transition hover:text-gray-500 lg:opacity-0 lg:group-hover:opacity-100 dark:text-gray-400"
               viewBox="0 0 20 20"
               fill="currentColor"
               onClick={() => handleDeleteMessage(message)}
@@ -130,11 +136,11 @@ const ChatMessage = React.memo(
       ) : (
         <div className={`flex space-x-2 space-y-2 ${messageClass} `}>
           <img
-            className={`mb-1 mt-auto h-6 w-6 rounded-full ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
+            className={`mb-1 mt-auto h-4 w-4 rounded-full ring-2 ring-blue-500 dark:ring-indigo-600 ${messageClass}`}
             src={photoURL}
             alt=""
           />
-          <div className="flex w-60 rounded-xl bg-gray-200 p-2 text-gray-100 dark:bg-gray-600">
+          <div className="flex w-60 rounded-md border-2 border-gray-300 dark:border-gray-700 bg-transparent p-2 text-gray-400">
             <p>Message has been deleted.</p>
           </div>
         </div>
