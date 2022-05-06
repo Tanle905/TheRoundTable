@@ -30,13 +30,15 @@ const Message = React.memo(() => {
   const [user] = useAuthState(auth);
   const userRef = firebase.firestore().collection("users");
   const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
-  const usersId = usersCollectionData && usersCollectionData.map(user=> user.uid)
+  const usersId =
+    usersCollectionData && usersCollectionData.map((user) => user.uid);
 
   //fileHandle init and variables
   const storage = getStorage(firebaseApp);
   const [showFile, setShowFile] = useState(false);
 
   //Friends init and variable
+  const [filterResult, setFilterResult] = useState("");
   const [uidValue, setUidValue] = useState("");
   const [showFriendList, setShowFriendList] = useState(false);
   const userFriendRef = user
@@ -48,6 +50,7 @@ const Message = React.memo(() => {
   const [activeName, setActiveName] = useState([""]);
 
   // Messages init and variables
+  const [filterMessageResult, setFilterMessageResult] = useState("");
   const messagesRef = firebase.firestore().collection("messages");
   const [messageValue, setMessageValue] = useState("");
   const messagesQuery = messagesRef.orderBy("createdAt").limit(50);
@@ -149,7 +152,12 @@ const Message = React.memo(() => {
   //END OF Friends Section ( FriendsList and addFriend)
 
   //Chat section
-
+  useEffect(() => {
+    currentMessageRef.current.scrollIntoView({
+      block: "nearest",
+      inline: "start",
+    });
+  }, [activeFriend]);
   const sendMessage = async (e) => {
     e.preventDefault();
     if (messageValue !== "") {
@@ -295,14 +303,19 @@ const Message = React.memo(() => {
           <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200">
             Friends
           </h1>
-          <form className="group relative ml-auto py-3 sm:mr-2">
+          <form className="group relative my-auto ml-auto mr-2 py-3">
             <input
-              className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
+              className="form-input h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
               type="search"
               name="search"
+              value={filterResult}
+              onChange={(e) => setFilterResult(e.target.value.toLowerCase())}
               placeholder="Find a Friends..."
             />
-            <button className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300">
+            <button
+              onClick={(e) => e.preventDefault()}
+              className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -348,6 +361,7 @@ const Message = React.memo(() => {
           </form>
         </div>
         <Friends
+          filterResult={filterResult}
           auth={auth}
           msg={messages}
           userFriendsCollectionData={userFriendsCollectionData}
@@ -386,6 +400,8 @@ const Message = React.memo(() => {
               </svg>
               {
                 <SlideOver
+                  filterResult={filterResult}
+                  setFilterResult={setFilterResult}
                   addfriend={addfriend}
                   setUidValue={setUidValue}
                   uidValue={uidValue}
@@ -413,53 +429,86 @@ const Message = React.memo(() => {
                 {activeName}
               </p>
             </div>
+            <form className="group relative ml-2 lg:my-auto">
+              <input
+                className="form-input h-7 w-3 rounded-md border-0 bg-gray-50 font-semibold duration-200 group-hover:w-36 focus:border-0 focus:pr-10 focus:ring-0 dark:bg-slate-800 dark:text-gray-50 dark:placeholder:text-slate-400 sm:w-44 sm:group-hover:w-96 xl:h-12"
+                type="search"
+                name="search"
+                value={filterMessageResult}
+                onChange={(e) =>
+                  setFilterMessageResult(e.target.value.toLowerCase())
+                }
+                placeholder="Find Messages..."
+              />
+              <button
+                onClick={(e) => e.preventDefault()}
+                className="absolute right-2 -top-2.5 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300 lg:-top-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 lg:h-6 lg:w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </form>
             <div className="relative my-auto mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
               {userFriendsCollectionData &&
-                userFriendsCollectionData.length !== 0 &&
-                usersId.includes(activeFriend) ? (
-                  <Dropdown
-                    host={
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="my-auto h-7 w-7"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                        />
-                      </svg>
-                    }
-                    position="top-5"
-                    contents={{
-                      options: [
-                        <div className="flex space-x-3">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
-                            />
-                          </svg>
-                          <p onClick={() => removeFriendHandle()}>
-                            Remove Friend
-                          </p>
-                        </div>,
-                      ],
-                    }}
-                  />
-                ): ''}
+              userFriendsCollectionData.length !== 0 &&
+              usersId.includes(activeFriend) ? (
+                <Dropdown
+                  host={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="my-auto h-7 w-7"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+                      />
+                    </svg>
+                  }
+                  position="top-5"
+                  contents={{
+                    options: [
+                      <div className="flex space-x-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                          />
+                        </svg>
+                        <p onClick={() => removeFriendHandle()}>
+                          Remove Friend
+                        </p>
+                      </div>,
+                    ],
+                  }}
+                />
+              ) : (
+                ""
+              )}
               {/* {userFriendsCollectionData &&
                 userFriendsCollectionData.length !== 0 && (
                   <React.Fragment>
@@ -538,6 +587,7 @@ const Message = React.memo(() => {
           </div>
           <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[75vh] space-y-4 overflow-y-auto p-1 sm:h-[69vh] sm:p-3">
             <Chat
+              filterMessageResult={filterMessageResult}
               messages={messages}
               activeFriend={activeFriend}
               groupId={groupId}

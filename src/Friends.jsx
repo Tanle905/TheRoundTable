@@ -1,12 +1,13 @@
 import moment from "moment";
 import firebase from "firebase/compat/app";
-import React from "react";
+import React, { useState } from "react";
 import GroupForm from "./GroupForm";
 import { Group } from "./Group";
 import firstTimeGroupImg from "./svg/teammeeting.svg";
 import friendSvg from "./svg/groupImg.svg";
 
 function Friends({
+  filterResult,
   msg,
   userFriendsCollectionData,
   userFriendsCollectionDataIsLoading,
@@ -123,7 +124,7 @@ function Friends({
           {userFriendsCollectionData &&
           userFriendsCollectionData.length !== 0 ? (
             userFriendsCollectionData.map((element, index) => (
-              <FriendsList friends={element} key={index} msg={msg} />
+              element.friendName.toLowerCase().includes(filterResult) && <FriendsList friends={element} key={index} msg={msg} />
             ))
           ) : userFriendsCollectionDataIsLoading ? (
             <div className="flex h-[30vh] place-content-center bg-gray-50 dark:bg-slate-900">

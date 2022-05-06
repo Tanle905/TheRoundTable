@@ -66,7 +66,7 @@ const ChatMessage = React.memo(
           {image && (
             <img
               src={image}
-              className="w-60 rounded-md sm:h-80 sm:w-auto xl:max-w-2xl "
+              className="w-60 rounded-md sm:h-80 sm:w-auto"
               alt=""
             />
           )}
@@ -74,7 +74,7 @@ const ChatMessage = React.memo(
             <video
               controls
               src={video}
-              className="w-64 rounded-md sm:max-h-80 sm:w-auto xl:max-w-full "
+              className="w-64 rounded-md sm:h-80 sm:w-auto xl:max-w-full "
               alt=""
             />
           )}
@@ -117,7 +117,7 @@ const ChatMessage = React.memo(
           {messageClass === "sent" && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 cursor-pointer self-center text-gray-800 transition hover:text-gray-500 lg:opacity-0 lg:group-hover:opacity-100 dark:text-gray-400"
+              className="h-5 w-5 cursor-pointer self-center text-gray-800 transition hover:text-gray-500 dark:text-gray-400 lg:opacity-0 lg:group-hover:opacity-100"
               viewBox="0 0 20 20"
               fill="currentColor"
               onClick={() => handleDeleteMessage(message)}
@@ -140,7 +140,7 @@ const ChatMessage = React.memo(
             src={photoURL}
             alt=""
           />
-          <div className="flex w-60 rounded-md border-2 border-gray-300 dark:border-gray-700 bg-transparent p-2 text-gray-400">
+          <div className="flex w-60 rounded-md border-2 border-gray-300 bg-transparent p-2 text-gray-400 dark:border-gray-700">
             <p>Message has been deleted.</p>
           </div>
         </div>
@@ -149,21 +149,36 @@ const ChatMessage = React.memo(
   }
 );
 
-const Chat = React.memo(({ messages, activeFriend, groupId, messagesRef }) => {
-  return (
-    <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
-      {messages &&
-        messages.map((msg) => (
-          <ChatMessage
-            key={msg.id}
-            message={msg}
-            activeFriend={activeFriend}
-            groupId={groupId}
-            messagesRef={messagesRef}
-          />
-        ))}
-    </div>
-  );
-});
+const Chat = React.memo(
+  ({ filterMessageResult, messages, activeFriend, groupId, messagesRef }) => {
+    return (
+      <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
+        {messages &&
+          messages.map(
+            (msg) =>
+              (msg.text &&
+                msg.text.toLowerCase().includes(filterMessageResult) && (
+                  <ChatMessage
+                    key={msg.id}
+                    message={msg}
+                    activeFriend={activeFriend}
+                    groupId={groupId}
+                    messagesRef={messagesRef}
+                  />
+                )) ||
+              (filterMessageResult === "" && (
+                <ChatMessage
+                  key={msg.id}
+                  message={msg}
+                  activeFriend={activeFriend}
+                  groupId={groupId}
+                  messagesRef={messagesRef}
+                />
+              ))
+          )}
+      </div>
+    );
+  }
+);
 
 export default Chat;

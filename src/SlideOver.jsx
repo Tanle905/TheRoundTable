@@ -3,6 +3,8 @@ import { Dialog, Transition } from "@headlessui/react";
 import Friends from "./Friends";
 
 export default function SlideOver({
+  filterResult,
+  setFilterResult,
   auth,
   addfriend,
   uidValue,
@@ -62,14 +64,21 @@ export default function SlideOver({
                       >
                         Friends
                       </h1>
-                      <form className="group relative ml-auto py-3 sm:mr-2">
+                      <form className="group relative my-auto ml-auto mr-2 py-3">
                         <input
-                          className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
+                          className="form-input h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
                           type="search"
                           name="search"
+                          value={filterResult}
+                          onChange={(e) =>
+                            setFilterResult(e.target.value.toLowerCase())
+                          }
                           placeholder="Find a Friends..."
                         />
-                        <button className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300">
+                        <button
+                          onClick={(e) => e.preventDefault()}
+                          className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
+                        >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
@@ -118,6 +127,7 @@ export default function SlideOver({
                       </form>
                     </div>
                     <Friends
+                      filterResult={filterResult}
                       auth={auth}
                       msg={messages}
                       userFriendsCollectionData={userFriendsCollectionData}
