@@ -1,9 +1,9 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { useState } from "react";
 import { Fragment } from "react/cjs/react.production.min";
-import { addGroup } from "./Group";
+import { addGroup } from "./GroupList";
 
-export default function GroupForm({ state, setState, friends, userId }) {
+export default function GroupForm({ state, setState, groupRef, friends, userId }) {
   const [groupName, setGroupName] = useState("");
   const [selectedFriends, setSelectedFriends] = useState([userId]);
   const handleSelectedFriends = (friend) => {
@@ -89,14 +89,8 @@ export default function GroupForm({ state, setState, friends, userId }) {
                   <button
                     className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     onClick={(e) => {
-                      e.preventDefault
-                      addGroup(
-                        e,
-                        groupName,
-                        setGroupName,
-                        selectedFriends,
-                        friends
-                      );
+                      e.preventDefault;
+                      addGroup(e, groupRef, groupName, setGroupName, selectedFriends, friends);
                       groupName != "" && setState(false);
                     }}
                   >

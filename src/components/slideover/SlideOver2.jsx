@@ -1,6 +1,6 @@
 import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import File from "./File";
+import File from "../File";
 
 export default function SlideOver2({
   messages,

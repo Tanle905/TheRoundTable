@@ -1,7 +1,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
-import GoogleIco from "./svg/google_ico.svg";
+import GoogleIco from "../svg/google_ico.svg";
 
 export default function SignIn() {
   const auth = firebase.auth();

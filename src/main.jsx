@@ -2,9 +2,9 @@ import React from "react";
 import { BrowserRouter,Routes, Route } from "react-router-dom";
 import ReactDOM from "react-dom";
 import "./index.css";
-import { App } from "./App";
-import AdminLogin from "./AdminLogin";
-import Admin from "./Admin";
+import { App } from "./components/App";
+import AdminLogin from "./components/admin/AdminLogin";
+import Admin from "./components/admin/Admin";
 
 ReactDOM.render(
   <React.StrictMode>

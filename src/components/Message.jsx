@@ -1,16 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import firebase from "firebase/compat/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useCollectionData, useDocument } from "react-firebase-hooks/firestore";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import SlideOver from "./SlideOver";
-import SlideOver2 from "./SlideOver2";
+import SlideOver from "./slideover/SlideOver";
+import SlideOver2 from "./slideover/SlideOver2";
 import Chat from "./Chat";
 import File from "./File";
-import Friends from "./Friends";
+import { Friends, removeFriend } from "./friend/Friends";
 import Dropdown from "./Dropdown";
-import RTC from "./webRTC";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -26,10 +25,12 @@ const Message = React.memo(() => {
   });
 
   //Users init and variables
+  const firestore = firebase.firestore;
   const auth = firebase.auth();
   const [user] = useAuthState(auth);
-  const userRef = firebase.firestore().collection("users");
-  const [usersCollectionData, usersDataLoading] = useCollectionData(userRef);
+  const userRef = firestore().collection("users");
+  const [usersCollectionData, usersCollectionDataLoading] =
+    useCollectionData(userRef);
   const usersId =
     usersCollectionData && usersCollectionData.map((user) => user.uid);
 
@@ -38,8 +39,6 @@ const Message = React.memo(() => {
   const [showFile, setShowFile] = useState(false);
 
   //Friends init and variable
-  const [filterResult, setFilterResult] = useState("");
-  const [uidValue, setUidValue] = useState("");
   const [showFriendList, setShowFriendList] = useState(false);
   const userFriendRef = user
     ? userRef.doc(user.uid).collection("friends")
@@ -51,7 +50,7 @@ const Message = React.memo(() => {
 
   // Messages init and variables
   const [filterMessageResult, setFilterMessageResult] = useState("");
-  const messagesRef = firebase.firestore().collection("messages");
+  const messagesRef = firestore().collection("messages");
   const [messageValue, setMessageValue] = useState("");
   const messagesQuery = messagesRef.orderBy("createdAt").limit(50);
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
@@ -59,14 +58,10 @@ const Message = React.memo(() => {
   /*END OF Init and Variables Section*/
 
   //Group init and variables
-  const groupRef = firebase.firestore().collection("groups");
-  const [showGroupForm, setShowGroupForm] = useState(false);
-  const [groupId, setGroupId] = useState("");
+  const groupRef = firestore().collection("groups");
   const [groupsCollectionData] = useCollectionData(groupRef);
-  const [userGroupCollectionData, userGroupCollectionDataIsLoading] =
-    useCollectionData(
-      userRef.doc(firebase.auth().currentUser.uid).collection("groups")
-    );
+  const [groupId, setGroupId] = useState("");
+
   //End of group init and variables
 
   //WebRTC init and variables
@@ -92,63 +87,7 @@ const Message = React.memo(() => {
 
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
-  useEffect(() => {
-    setActiveFriend(
-      userFriendsCollectionData != null &&
-        userFriendsCollectionData.length != 0 &&
-        userFriendsCollectionData[0].friendUid
-    );
-    setActiveName(
-      userFriendsCollectionData != null &&
-        userFriendsCollectionData.length != 0 &&
-        userFriendsCollectionData[0].friendName
-    );
-  }, [userFriendsCollectionData]);
 
-  const addfriend = (e) => {
-    e.preventDefault();
-    if (!usersDataLoading && userRef) {
-      usersCollectionData.forEach(async (element) => {
-        if (element.uid === uidValue) {
-          await userFriendRef.doc(uidValue).set({
-            friendEmail: element.email,
-            friendName: element.name,
-            friendUid: element.uid,
-            friendphotoURL: element.photoURL,
-            isFriend: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-          await userRef.doc(uidValue).collection("friends").doc(user.uid).set({
-            friendEmail: user.email,
-            friendName: user.displayName,
-            friendUid: user.uid,
-            friendphotoURL: user.photoURL,
-            isFriend: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-      });
-      setUidValue("");
-    }
-  };
-  const removeFriendHandle = () => {
-    if (!usersDataLoading && userRef) {
-      usersCollectionData.forEach(async (element) => {
-        if (element.uid === activeFriend) {
-          await userFriendRef.doc(activeFriend).set({
-            isFriend: false,
-          });
-          await userRef
-            .doc(activeFriend)
-            .collection("friends")
-            .doc(auth.currentUser.uid)
-            .set({
-              isFriend: false,
-            });
-        }
-      });
-    }
-  };
   //END OF Friends Section ( FriendsList and addFriend)
 
   //Chat section
@@ -299,84 +238,26 @@ const Message = React.memo(() => {
   return (
     <section className="grid grid-cols-12 bg-gray-50 dark:bg-slate-900">
       <div className="col-span-3 hidden shadow-md shadow-gray-500 dark:shadow-slate-800 xl:block">
-        <div className="flex border-b-2 border-gray-200 px-4 dark:border-slate-800">
-          <h1 className="my-auto text-xl font-bold text-gray-800 dark:text-gray-200">
-            Friends
-          </h1>
-          <form className="group relative my-auto ml-auto mr-2 py-3">
-            <input
-              className="form-input h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 md:focus:w-44 md:group-hover:w-44"
-              type="search"
-              name="search"
-              value={filterResult}
-              onChange={(e) => setFilterResult(e.target.value.toLowerCase())}
-              placeholder="Find a Friends..."
-            />
-            <button
-              onClick={(e) => e.preventDefault()}
-              className="absolute right-2 top-0 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          </form>
-          <form className="group relative my-auto py-3" onSubmit={addfriend}>
-            <input
-              key="uidInput"
-              className="form-input ml-2 h-10 w-10 transform rounded-md border-0 bg-gray-50 pr-10 font-semibold duration-200 focus:w-36 focus:border-0 focus:ring-0 group-hover:w-36 group-hover:bg-gray-200 dark:bg-slate-900 dark:text-gray-50 dark:placeholder:text-slate-400 dark:group-hover:bg-slate-800 xl:focus:w-44 xl:group-hover:w-44"
-              type="text"
-              placeholder="Add a Friend UID"
-              value={uidValue}
-              onChange={(e) => setUidValue(e.target.value)}
-            />
-            <button
-              className="absolute right-2 top-0 mt-5 text-gray-600 transition-all group-hover:rotate-180 dark:text-gray-50"
-              type="submit"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </form>
-        </div>
         <Friends
-          filterResult={filterResult}
           auth={auth}
-          msg={messages}
+          firestore={firestore}
+          user={user}
+          userRef={userRef}
+          usersCollectionData={usersCollectionData}
+          usersDataLoading={usersCollectionDataLoading}
+          userFriendRef={userFriendRef}
+          messages={messages}
           userFriendsCollectionData={userFriendsCollectionData}
           userFriendsCollectionDataIsLoading={
             userFriendsCollectionDataIsLoading
           }
+          groupRef={groupRef}
           groupsCollectionData={groupsCollectionData}
-          userGroupCollectionData={userGroupCollectionData}
-          showGroupForm={showGroupForm}
           activeFriend={activeFriend}
           setActiveFriend={setActiveFriend}
           setGroupId={setGroupId}
           setActiveName={setActiveName}
           showFriendList={showFriendList}
-          setShowGroupForm={setShowGroupForm}
         />
       </div>
       <div className="col-span-12 grid h-screen grid-rows-6 lg:col-span-9 xl:col-span-7">
@@ -400,24 +281,24 @@ const Message = React.memo(() => {
               </svg>
               {
                 <SlideOver
-                  filterResult={filterResult}
-                  setFilterResult={setFilterResult}
-                  addfriend={addfriend}
-                  setUidValue={setUidValue}
-                  uidValue={uidValue}
+                  auth={auth}
+                  firestore={firestore}
+                  user={user}
+                  userRef={userRef}
+                  usersCollectionData={usersCollectionData}
+                  usersDataLoading={usersCollectionDataLoading}
+                  userFriendRef={userFriendRef}
                   messages={messages}
                   userFriendsCollectionData={userFriendsCollectionData}
                   userFriendsCollectionDataIsLoading={
                     userFriendsCollectionDataIsLoading
                   }
+                  groupRef={groupRef}
                   groupsCollectionData={groupsCollectionData}
-                  userGroupCollectionData={userGroupCollectionData}
-                  showGroupForm={showGroupForm}
                   activeFriend={activeFriend}
                   setActiveFriend={setActiveFriend}
                   setGroupId={setGroupId}
                   setActiveName={setActiveName}
-                  setShowGroupForm={setShowGroupForm}
                   showFriendList={showFriendList}
                   setShowFriendList={setShowFriendList}
                 />
@@ -431,7 +312,7 @@ const Message = React.memo(() => {
             </div>
             <form className="group relative ml-2 lg:my-auto">
               <input
-                className="form-input h-7 w-3 rounded-md border-0 bg-gray-50 font-semibold duration-200 group-hover:w-36 focus:border-0 focus:pr-10 focus:ring-0 dark:bg-slate-800 dark:text-gray-50 dark:placeholder:text-slate-400 sm:w-44 sm:group-hover:w-96 xl:h-12"
+                className="form-input h-7 w-3 rounded-md border-0 bg-transparent font-semibold duration-200 hover:border-2 focus:pr-8 group-hover:w-36 dark:text-gray-50 dark:placeholder:text-gray-400 placeholder:text-sm sm:w-44 sm:group-hover:w-96 xl:h-12"
                 type="search"
                 name="search"
                 value={filterMessageResult}
@@ -442,7 +323,7 @@ const Message = React.memo(() => {
               />
               <button
                 onClick={(e) => e.preventDefault()}
-                className="absolute right-2 -top-2.5 mt-5 text-gray-600 transition-all hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-300 lg:-top-2"
+                className="absolute block lg:hidden right-2 -top-2.5 mt-5 text-gray-600 transition dark:text-gray-50 lg:-top-2"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -499,7 +380,18 @@ const Message = React.memo(() => {
                             d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
                           />
                         </svg>
-                        <p onClick={() => removeFriendHandle()}>
+                        <p
+                          onClick={() =>
+                            removeFriend(
+                              usersCollectionDataLoading,
+                              userRef,
+                              usersCollectionData,
+                              userFriendRef,
+                              auth,
+                              activeFriend
+                            )
+                          }
+                        >
                           Remove Friend
                         </p>
                       </div>,
@@ -606,7 +498,7 @@ const Message = React.memo(() => {
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
-          <div className="fixed bottom-0 row-start-6 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
+          <div className=" mx-1 fixed bottom-0 row-start-6 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
             <form
               onSubmit={sendMessage}
               className="flex justify-center sm:px-3 xl:px-0"
