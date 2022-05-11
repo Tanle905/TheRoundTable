@@ -10,7 +10,7 @@ function Header() {
 
   return (
     <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
-      <div className="flex sm:grid sm:grid-cols-4 sm:py-2">
+      <div className="flex sm:grid sm:grid-cols-4">
         <div className="sm:col-span-2 my-auto sm:ml-2 flex text-blue-500 dark:text-indigo-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"

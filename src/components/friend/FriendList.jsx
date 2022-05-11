@@ -42,7 +42,7 @@ const FriendList = React.memo(function FriendList({
     >
       <div className="grid grid-cols-10 space-x-2 rounded-lg p-2 transition-all hover:cursor-pointer focus:bg-gray-200">
         <img
-          className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
+          className="max-h-10 w-10 my-auto rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
           src={friendphotoURL}
           alt=""
         />

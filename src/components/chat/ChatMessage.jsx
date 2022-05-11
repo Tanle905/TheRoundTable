@@ -59,7 +59,7 @@ const ChatMessage = React.memo(
           {image && (
             <img
               src={image}
-              className="w-60 rounded-md sm:h-96 sm:w-auto sm:max-w-3xl"
+              className="w-60 rounded-md sm:h-96 sm:w-auto sm:max-w-2xl"
               alt=""
             />
           )}

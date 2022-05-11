@@ -46,25 +46,30 @@ const Message = React.memo(() => {
     : null;
   const [userFriendsCollectionData, userFriendsCollectionDataIsLoading] =
     useCollectionData(userFriendRef.orderBy("createdAt", "desc"));
-  const [activeFriend, setActiveFriend] = useState([""]);
+  const [activeFriend, setActiveFriend] = useState("");
   const [activeName, setActiveName] = useState([""]);
-    //End of friend init and variables
+  //End of friend init and variables
   //Group init and variables
   const groupRef = firestore().collection("groups");
   const [groupsCollectionData] = useCollectionData(groupRef);
   const [groupId, setGroupId] = useState("");
+  const selectedGroup = groupsCollectionData
+    ? groupsCollectionData.filter((data) => data.groupId === groupId)
+    : null;
+  const selectedGroupMembers =
+    selectedGroup !== null && selectedGroup[0] ? selectedGroup[0].members : "";
   //End of group init and variables
   // Messages init and variables
   const [filterMessageResult, setFilterMessageResult] = useState("");
   const messagesRef = firestore().collection("messages");
   const [messageValue, setMessageValue] = useState("");
   const messagesQuery = messagesRef
-    .orderBy("createdAt")
-    .limit(50);
-  const [messages] = useCollectionData(messagesQuery);
+    .where("owner", "array-contains", auth.currentUser.uid)
+    .limit(100);
+  const [messages] = useCollectionData(messagesQuery, { idField: "id" });
+  const sortedMessages = _.orderBy(messages, (o) => o.createdAt, "asc");
   let currentMessageRef = useRef();
   /*END OF Init and Variables Section*/
-
 
   const mergedData = userFriendsCollectionData &&
     groupsCollectionData && [
@@ -112,6 +117,11 @@ const Message = React.memo(() => {
           mergedDataSorted.length != 0 &&
           mergedDataSorted[0].name)
     );
+    setGroupId(
+      mergedDataSorted != null &&
+        mergedDataSorted.length != 0 &&
+        mergedDataSorted[0].groupId
+    );
   }, [groupsCollectionData, userFriendsCollectionData]);
   //END OF Friends Section ( FriendsList and addFriend)
 
@@ -123,21 +133,21 @@ const Message = React.memo(() => {
     });
   }, [activeFriend]);
   const sendMessage = async (e) => {
-    e.preventDefault();
     if (messageValue !== "") {
-      const { photoURL } = auth.currentUser;
-      const msgId = messagesRef.doc().id;
-      messagesRef.doc(msgId).set({
-        text: messageValue,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        id: msgId,
-        photoURL,
-        sentFrom: user.uid,
-        sendTo: activeFriend,
-        deleted: false,
-      });
-      setMessageValue("");
       if (!groupId) {
+        e.preventDefault();
+        const { photoURL } = auth.currentUser;
+        const msgId = messagesRef.doc().id;
+        messagesRef.doc(msgId).set({
+          text: messageValue,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          id: msgId,
+          photoURL,
+          sentFrom: user.uid,
+          sendTo: activeFriend,
+          owner: [user.uid, activeFriend],
+          deleted: false,
+        });
         await userFriendRef.doc(activeFriend).update({
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
@@ -154,10 +164,24 @@ const Message = React.memo(() => {
           inline: "start",
         });
       } else {
+        e.preventDefault();
+        const { photoURL } = auth.currentUser;
+        const msgId = messagesRef.doc().id;
+        messagesRef.doc(msgId).set({
+          text: messageValue,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          id: msgId,
+          photoURL,
+          sentFrom: user.uid,
+          sendTo: activeFriend,
+          owner: [user.uid, ...selectedGroupMembers],
+          deleted: false,
+        });
         groupRef.doc(groupId).update({
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
       }
+      setMessageValue("");
     }
   };
   //END OF Chat section
@@ -278,7 +302,7 @@ const Message = React.memo(() => {
           usersDataLoading={usersCollectionDataLoading}
           mergedDataSorted={mergedDataSorted}
           userFriendRef={userFriendRef}
-          messages={messages}
+          messages={sortedMessages}
           userFriendsCollectionData={userFriendsCollectionData}
           userFriendsCollectionDataIsLoading={
             userFriendsCollectionDataIsLoading
@@ -321,7 +345,7 @@ const Message = React.memo(() => {
                   usersDataLoading={usersCollectionDataLoading}
                   mergedDataSorted={mergedDataSorted}
                   userFriendRef={userFriendRef}
-                  messages={messages}
+                  messages={sortedMessages}
                   userFriendsCollectionData={userFriendsCollectionData}
                   userFriendsCollectionDataIsLoading={
                     userFriendsCollectionDataIsLoading
@@ -499,7 +523,7 @@ const Message = React.memo(() => {
                 </svg>
                 {
                   <SlideOver2
-                    messages={messages}
+                    messages={sortedMessages}
                     activeFriend={activeFriend}
                     groupId={groupId}
                     groupsCollectionData={groupsCollectionData}
@@ -514,7 +538,7 @@ const Message = React.memo(() => {
             <Chat
               auth={auth}
               filterMessageResult={filterMessageResult}
-              messages={messages}
+              messages={sortedMessages}
               activeFriend={activeFriend}
               groupId={groupId}
               messagesRef={messagesRef}
@@ -610,7 +634,7 @@ const Message = React.memo(() => {
         <div className="mx-3">
           <div className="overflow-auto">
             <File
-              messages={messages}
+              messages={sortedMessages}
               activeFriend={activeFriend}
               groupId={groupId}
             />
