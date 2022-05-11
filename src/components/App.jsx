@@ -23,7 +23,8 @@ const App = () => {
   const userRef = firebase.firestore().collection("users");
   const userDocRef =
     user && firebase.firestore().collection("users").doc(user.uid);
-  const [userDocumentData] = useDocumentData(userDocRef);
+  const [userDocumentData, userDocumentDataIsLoading] =
+    useDocumentData(userDocRef);
   const addUser = () => {
     if (!authLoading) {
       userRef.doc(user.uid).set({
@@ -35,31 +36,38 @@ const App = () => {
     }
   };
 
-  let someThing;
-  if (user && !authLoading) {
-    if (userDocumentData !== undefined && !userDocumentData.banned) {
-      addUser();
-      someThing = (
+  let content;
+  if (!authLoading && user && !userDocumentDataIsLoading) {
+    if (
+      userDocumentData !== undefined &&
+      !userDocumentData.banned
+    ) {
+      content = (
         <div className="h-screen overflow-hidden">
           <Header />
           <Message />
         </div>
       );
-    }else if(userDocumentData !== undefined){
-      alert('you have been banned')
-      auth.signOut()
-      someThing = <SignIn />;
+    } else if (
+      userDocumentData !== undefined &&
+      userDocumentData.banned
+    ) {
+      alert("you have been banned");
+      auth.signOut();
+      content = <SignIn />;
+    } else if (!userDocumentDataIsLoading && userDocumentData === undefined) {
+      addUser();
     }
   } else if (!user && !authLoading) {
-    someThing = <SignIn />;
+    content = <SignIn />;
   } else {
-    someThing = (
+    content = (
       <div className="flex h-screen place-content-center bg-gray-50 dark:bg-slate-900">
         <div className="my-auto h-24 w-24 animate-bounce rounded-lg bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75"></div>
       </div>
     );
   }
-  return <div>{someThing}</div>;
+  return <div>{content}</div>;
 };
 
 export { App, firebaseApp };

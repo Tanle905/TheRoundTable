@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
-import GroupForm from "./GroupForm";
-import { Group } from "./GroupList";
+import GroupForm from "./group/GroupForm";
+import { Group } from "./group/GroupList";
 import FriendList from "./FriendList";
 import friendSvg from "../../svg/groupImg.svg";
 
@@ -36,6 +36,7 @@ function Friends({
   user,
   userRef,
   usersCollectionData,
+  mergedDataSorted,
   userFriendRef,
   usersDataLoading: usersCollectionDataLoading,
   messages,
@@ -51,24 +52,6 @@ function Friends({
   const [filterFriendResult, setFilterFriendResult] = useState("");
   const [uidValue, setUidValue] = useState("");
   const [showGroupForm, setShowGroupForm] = useState(false);
-  const mergedData = userFriendsCollectionData &&
-    groupsCollectionData && [
-      ...userFriendsCollectionData,
-      ...groupsCollectionData,
-    ];
-
-  useEffect(() => {
-    setActiveFriend(
-      userFriendsCollectionData != null &&
-        userFriendsCollectionData.length != 0 &&
-        userFriendsCollectionData[0].friendUid
-    );
-    setActiveName(
-      userFriendsCollectionData != null &&
-        userFriendsCollectionData.length != 0 &&
-        userFriendsCollectionData[0].friendName
-    );
-  }, [userFriendsCollectionData]);
 
   const addfriend = (event) => {
     event.preventDefault();
@@ -202,8 +185,8 @@ function Friends({
           >
             <span className="font-semibold">UID:</span> {auth.currentUser.uid}
           </p>
-          {mergedData && mergedData.length !== 0 ? (
-            mergedData.map(
+          {mergedDataSorted && mergedDataSorted.length !== 0 ? (
+            mergedDataSorted.map(
               (element, index) =>
                 (element.friendName !== undefined &&
                   element.friendName
@@ -224,11 +207,13 @@ function Friends({
                   element.name.toLowerCase().includes(filterFriendResult) && (
                     <Group
                       key={index}
+                      auth={auth}
                       group={element}
                       activeGroup={activeFriend}
                       setActive={setActiveFriend}
                       setGroupId={setGroupId}
                       setActiveName={setActiveName}
+                      messages={messages}
                     />
                   ))
             )

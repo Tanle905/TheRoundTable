@@ -6,10 +6,11 @@ import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import SlideOver from "./slideover/SlideOver";
 import SlideOver2 from "./slideover/SlideOver2";
-import Chat from "./Chat";
+import Chat from "./chat/Chat";
 import File from "./File";
 import { Friends, removeFriend } from "./friend/Friends";
 import Dropdown from "./Dropdown";
+import _ from "lodash";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -47,7 +48,6 @@ const Message = React.memo(() => {
     useCollectionData(userFriendRef.orderBy("createdAt", "desc"));
   const [activeFriend, setActiveFriend] = useState([""]);
   const [activeName, setActiveName] = useState([""]);
-
   // Messages init and variables
   const [filterMessageResult, setFilterMessageResult] = useState("");
   const messagesRef = firestore().collection("messages");
@@ -64,6 +64,12 @@ const Message = React.memo(() => {
 
   //End of group init and variables
 
+  const mergedData = userFriendsCollectionData &&
+    groupsCollectionData && [
+      ...userFriendsCollectionData,
+      ...groupsCollectionData,
+    ];
+  const mergedDataSorted = _.orderBy(mergedData, (o) => o.createdAt, "desc");
   //WebRTC init and variables
   // const servers = {
   //   iceservers: [
@@ -87,7 +93,18 @@ const Message = React.memo(() => {
 
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
-
+  useEffect(() => {
+    setActiveFriend(
+      mergedDataSorted != null &&
+        mergedDataSorted.length != 0 &&
+        mergedDataSorted[0].friendUid
+    );
+    setActiveName(
+      mergedDataSorted != null &&
+        mergedDataSorted.length != 0 &&
+        mergedDataSorted[0].friendName
+    );
+  }, [groupsCollectionData, userFriendsCollectionData]);
   //END OF Friends Section ( FriendsList and addFriend)
 
   //Chat section
@@ -112,21 +129,27 @@ const Message = React.memo(() => {
         deleted: false,
       });
       setMessageValue("");
-      await userFriendRef.doc(activeFriend).update({
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-      await userRef
-        .doc(activeFriend)
-        .collection("friends")
-        .doc(user.uid)
-        .update({
+      if (!groupId) {
+        await userFriendRef.doc(activeFriend).update({
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
-      currentMessageRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "start",
-      });
+        await userRef
+          .doc(activeFriend)
+          .collection("friends")
+          .doc(user.uid)
+          .update({
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        currentMessageRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "start",
+        });
+      } else {
+        groupRef.doc(groupId).update({
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      }
     }
   };
   //END OF Chat section
@@ -245,6 +268,7 @@ const Message = React.memo(() => {
           userRef={userRef}
           usersCollectionData={usersCollectionData}
           usersDataLoading={usersCollectionDataLoading}
+          mergedDataSorted={mergedDataSorted}
           userFriendRef={userFriendRef}
           messages={messages}
           userFriendsCollectionData={userFriendsCollectionData}
@@ -287,6 +311,7 @@ const Message = React.memo(() => {
                   userRef={userRef}
                   usersCollectionData={usersCollectionData}
                   usersDataLoading={usersCollectionDataLoading}
+                  mergedDataSorted={mergedDataSorted}
                   userFriendRef={userFriendRef}
                   messages={messages}
                   userFriendsCollectionData={userFriendsCollectionData}
@@ -312,7 +337,7 @@ const Message = React.memo(() => {
             </div>
             <form className="group relative ml-2 lg:my-auto">
               <input
-                className="form-input h-7 w-3 rounded-md border-0 bg-transparent font-semibold duration-200 hover:border-2 focus:pr-8 group-hover:w-36 dark:text-gray-50 dark:placeholder:text-gray-400 placeholder:text-sm sm:w-44 sm:group-hover:w-96 xl:h-12"
+                className="form-input h-7 w-3 rounded-md border-0 bg-transparent font-semibold duration-200 placeholder:text-sm hover:border-2 focus:pr-8 group-hover:w-36 dark:text-gray-50 dark:placeholder:text-gray-400 sm:w-44 sm:group-hover:w-96 xl:h-12"
                 type="search"
                 name="search"
                 value={filterMessageResult}
@@ -323,7 +348,7 @@ const Message = React.memo(() => {
               />
               <button
                 onClick={(e) => e.preventDefault()}
-                className="absolute block lg:hidden right-2 -top-2.5 mt-5 text-gray-600 transition dark:text-gray-50 lg:-top-2"
+                className="absolute right-2 -top-2.5 mt-5 block text-gray-600 transition dark:text-gray-50 lg:-top-2 lg:hidden"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -479,6 +504,7 @@ const Message = React.memo(() => {
           </div>
           <div className="scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch h-[75vh] space-y-4 overflow-y-auto p-1 sm:h-[69vh] sm:p-3">
             <Chat
+              auth={auth}
               filterMessageResult={filterMessageResult}
               messages={messages}
               activeFriend={activeFriend}
@@ -498,7 +524,7 @@ const Message = React.memo(() => {
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
-          <div className=" mx-1 fixed bottom-0 row-start-6 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
+          <div className=" fixed bottom-0 row-start-6 mx-1 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
             <form
               onSubmit={sendMessage}
               className="flex justify-center sm:px-3 xl:px-0"

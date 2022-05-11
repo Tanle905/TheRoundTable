@@ -5,7 +5,6 @@ import GoogleIco from "../svg/google_ico.svg";
 
 export default function SignIn() {
   const auth = firebase.auth();
-
   const signInWithGoggle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider);

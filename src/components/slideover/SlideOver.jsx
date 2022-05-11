@@ -8,6 +8,7 @@ export default function SlideOver({
   user,
   userRef,
   usersCollectionData,
+  mergedDataSorted,
   userFriendRef,
   usersCollectionDataLoading,
   messages,
@@ -64,6 +65,7 @@ export default function SlideOver({
                       userRef={userRef}
                       usersCollectionData={usersCollectionData}
                       usersDataLoading={usersCollectionDataLoading}
+                      mergedDataSorted={mergedDataSorted}
                       userFriendRef={userFriendRef}
                       messages={messages}
                       userFriendsCollectionData={userFriendsCollectionData}

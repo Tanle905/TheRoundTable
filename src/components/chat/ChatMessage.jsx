@@ -1,20 +1,8 @@
-import React from "react";
-import firebase from "firebase/compat/app";
 import moment from "moment";
-
-firebase.initializeApp({
-  apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
-  authDomain: "the-round-table-ffc3f.firebaseapp.com",
-  projectId: "the-round-table-ffc3f",
-  storageBucket: "the-round-table-ffc3f.appspot.com",
-  messagingSenderId: "551826854387",
-  appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
-  measurementId: "G-3NRE8RWMTD",
-});
-const auth = firebase.auth();
+import React from "react";
 
 const ChatMessage = React.memo(
-  ({ message, activeFriend, groupId, messagesRef }) => {
+  ({ auth, message, activeFriend, groupId, messagesRef }) => {
     const {
       image,
       video,
@@ -30,22 +18,27 @@ const ChatMessage = React.memo(
       createdAt,
     } = message;
     const messageClass =
-      auth !== null && sentFrom === auth.currentUser.uid ? "sent" : "received";
+      auth !== undefined && sentFrom === auth.currentUser.uid
+        ? "sent"
+        : "received";
     const date =
       createdAt != null &&
       moment(createdAt.toDate()).locale("vi").format("lll");
 
     function handleDeleteMessage() {
-      console.log(id);
       messagesRef &&
         messagesRef.doc(id).update({
           deleted: true,
         });
     }
     if (
-      (activeFriend === sendTo && auth.currentUser.uid === sentFrom) ||
-      (activeFriend === sentFrom && auth.currentUser.uid === sendTo) ||
-      groupId === sendTo
+      (auth !== undefined &&
+        activeFriend === sendTo &&
+        auth.currentUser.uid === sentFrom) ||
+      (auth !== undefined &&
+        activeFriend === sentFrom &&
+        auth.currentUser.uid === sendTo) ||
+      (auth !== undefined && groupId === sendTo)
     ) {
       return !deleted ? (
         <div className={`flex space-x-2 space-y-2 ${messageClass} group`}>
@@ -66,7 +59,7 @@ const ChatMessage = React.memo(
           {image && (
             <img
               src={image}
-              className="w-60 rounded-md sm:h-80 sm:w-auto"
+              className="w-60 rounded-md sm:h-96 sm:w-auto sm:max-w-3xl"
               alt=""
             />
           )}
@@ -74,7 +67,7 @@ const ChatMessage = React.memo(
             <video
               controls
               src={video}
-              className="w-64 rounded-md sm:h-80 sm:w-auto xl:max-w-full "
+              className="w-60 rounded-md sm:h-96 sm:w-auto sm:max-w-3xl"
               alt=""
             />
           )}
@@ -149,36 +142,4 @@ const ChatMessage = React.memo(
   }
 );
 
-const Chat = React.memo(
-  ({ filterMessageResult, messages, activeFriend, groupId, messagesRef }) => {
-    return (
-      <div className="px-1 pb-2 text-lg text-gray-200 dark:text-gray-200 xl:px-4">
-        {messages &&
-          messages.map(
-            (msg) =>
-              (msg.text &&
-                msg.text.toLowerCase().includes(filterMessageResult) && (
-                  <ChatMessage
-                    key={msg.id}
-                    message={msg}
-                    activeFriend={activeFriend}
-                    groupId={groupId}
-                    messagesRef={messagesRef}
-                  />
-                )) ||
-              (filterMessageResult === "" && (
-                <ChatMessage
-                  key={msg.id}
-                  message={msg}
-                  activeFriend={activeFriend}
-                  groupId={groupId}
-                  messagesRef={messagesRef}
-                />
-              ))
-          )}
-      </div>
-    );
-  }
-);
-
-export default Chat;
+export default ChatMessage;
