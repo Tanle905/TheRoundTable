@@ -48,21 +48,23 @@ const Message = React.memo(() => {
     useCollectionData(userFriendRef.orderBy("createdAt", "desc"));
   const [activeFriend, setActiveFriend] = useState([""]);
   const [activeName, setActiveName] = useState([""]);
-  // Messages init and variables
-  const [filterMessageResult, setFilterMessageResult] = useState("");
-  const messagesRef = firestore().collection("messages");
-  const [messageValue, setMessageValue] = useState("");
-  const messagesQuery = messagesRef.orderBy("createdAt").limit(50);
-  const [messages] = useCollectionData(messagesQuery, { idField: "id" });
-  let currentMessageRef = useRef();
-  /*END OF Init and Variables Section*/
-
+    //End of friend init and variables
   //Group init and variables
   const groupRef = firestore().collection("groups");
   const [groupsCollectionData] = useCollectionData(groupRef);
   const [groupId, setGroupId] = useState("");
-
   //End of group init and variables
+  // Messages init and variables
+  const [filterMessageResult, setFilterMessageResult] = useState("");
+  const messagesRef = firestore().collection("messages");
+  const [messageValue, setMessageValue] = useState("");
+  const messagesQuery = messagesRef
+    .orderBy("createdAt")
+    .limit(50);
+  const [messages] = useCollectionData(messagesQuery);
+  let currentMessageRef = useRef();
+  /*END OF Init and Variables Section*/
+
 
   const mergedData = userFriendsCollectionData &&
     groupsCollectionData && [
@@ -97,8 +99,7 @@ const Message = React.memo(() => {
     setActiveFriend(
       (mergedDataSorted != null &&
         mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].friendUid)
-        ||
+        mergedDataSorted[0].friendUid) ||
         (mergedDataSorted != null &&
           mergedDataSorted.length != 0 &&
           mergedDataSorted[0].groupId)
@@ -106,8 +107,7 @@ const Message = React.memo(() => {
     setActiveName(
       (mergedDataSorted != null &&
         mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].friendName)
-        ||
+        mergedDataSorted[0].friendName) ||
         (mergedDataSorted != null &&
           mergedDataSorted.length != 0 &&
           mergedDataSorted[0].name)

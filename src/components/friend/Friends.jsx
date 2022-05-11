@@ -30,7 +30,7 @@ const removeFriend = (
   }
 };
 
-function Friends({
+const Friends = React.memo(function Friends({
   auth,
   firestore,
   user,
@@ -193,13 +193,13 @@ function Friends({
                     .toLowerCase()
                     .includes(filterFriendResult) && (
                     <FriendList
+                      key={index}
                       auth={auth}
                       activeFriend={activeFriend}
                       setActiveFriend={setActiveFriend}
                       setActiveName={setActiveName}
                       setGroupId={setGroupId}
                       friend={element}
-                      key={index}
                       messages={messages}
                     />
                   )) ||
@@ -233,6 +233,6 @@ function Friends({
       </div>
     </Fragment>
   );
-}
+});
 
 export { Friends, removeFriend };

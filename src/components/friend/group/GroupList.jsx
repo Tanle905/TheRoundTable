@@ -57,7 +57,6 @@ function Group({
     messages.filter((message) => {
       if (groupId === message.sendTo) return message;
     });
-  console.log(filteredMessages);
   const latestMessages =
     filteredMessages != null &&
     filteredMessages.length !== 0 &&
@@ -70,7 +69,7 @@ function Group({
   )
     return (
       <li
-        className={`cursor-pointer ${groupClass}`}
+        className={`cursor-pointer px-3 ${groupClass}`}
         onClick={() => {
           setActive(groupId);
           setGroupId(groupId);

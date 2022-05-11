@@ -1,6 +1,7 @@
 import moment from "moment";
+import React from "react";
 
-function FriendList({
+const FriendList = React.memo(function FriendList({
   auth,
   activeFriend,
   setActiveFriend,
@@ -36,7 +37,7 @@ function FriendList({
     filteredMessages[filteredMessages.length - 1].createdAt.toDate();
   return isFriend ? (
     <li
-      className={`group transition ${friendClass} group`}
+      className={`group transition ${friendClass} group px-2`}
       onClick={friendRefHandle}
     >
       <div className="grid grid-cols-10 space-x-2 rounded-lg p-2 transition-all hover:cursor-pointer focus:bg-gray-200">
@@ -73,8 +74,10 @@ function FriendList({
               filteredMessages.length !== 0 &&
               filteredMessages[filteredMessages.length - 1].deleted ? (
               "deleted a message"
-            ) : (
+            ) : filteredMessages !== undefined ? (
               "No message recently"
+            ) : (
+              <p className="w-36 h-4 bg-transparent"></p>
             )}
           </div>
         </div>
@@ -99,6 +102,6 @@ function FriendList({
   ) : (
     ""
   );
-}
+});
 
 export default FriendList;
