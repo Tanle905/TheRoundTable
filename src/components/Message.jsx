@@ -95,14 +95,22 @@ const Message = React.memo(() => {
   //Friends Section ( FriendsList and addFriend)
   useEffect(() => {
     setActiveFriend(
-      mergedDataSorted != null &&
+      (mergedDataSorted != null &&
         mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].friendUid
+        mergedDataSorted[0].friendUid)
+        ||
+        (mergedDataSorted != null &&
+          mergedDataSorted.length != 0 &&
+          mergedDataSorted[0].groupId)
     );
     setActiveName(
-      mergedDataSorted != null &&
+      (mergedDataSorted != null &&
         mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].friendName
+        mergedDataSorted[0].friendName)
+        ||
+        (mergedDataSorted != null &&
+          mergedDataSorted.length != 0 &&
+          mergedDataSorted[0].name)
     );
   }, [groupsCollectionData, userFriendsCollectionData]);
   //END OF Friends Section ( FriendsList and addFriend)
