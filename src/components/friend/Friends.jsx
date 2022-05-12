@@ -5,6 +5,8 @@ import FriendList from "./FriendList";
 import friendSvg from "../../svg/groupImg.svg";
 
 const removeFriend = (
+  groupId,
+  groupRef,
   usersDataLoading,
   userRef,
   usersCollectionData,
@@ -13,20 +15,24 @@ const removeFriend = (
   activeFriend
 ) => {
   if (!usersDataLoading && userRef) {
-    usersCollectionData.forEach(async (element) => {
-      if (element.uid === activeFriend) {
-        await userFriendRef.doc(activeFriend).set({
-          isFriend: false,
-        });
-        await userRef
-          .doc(activeFriend)
-          .collection("friends")
-          .doc(auth.currentUser.uid)
-          .set({
+    if (!groupId) {
+      usersCollectionData.forEach(async (element) => {
+        if (element.uid === activeFriend) {
+          await userFriendRef.doc(activeFriend).set({
             isFriend: false,
           });
-      }
-    });
+          await userRef
+            .doc(activeFriend)
+            .collection("friends")
+            .doc(auth.currentUser.uid)
+            .set({
+              isFriend: false,
+            });
+        }
+      });
+    } else {
+      groupRef.doc(groupId).delete();
+    }
   }
 };
 
@@ -43,7 +49,6 @@ const Friends = React.memo(function Friends({
   userFriendsCollectionData,
   userFriendsCollectionDataIsLoading,
   groupRef,
-  groupsCollectionData,
   activeFriend,
   setActiveFriend,
   setGroupId,

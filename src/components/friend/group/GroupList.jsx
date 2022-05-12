@@ -77,7 +77,7 @@ function Group({
         }}
       >
         <div className="grid grid-cols-10 space-x-2 rounded-lg p-2 transition-all hover:cursor-pointer focus:bg-gray-200">
-          <div className="relative mt-1">
+          {friendsData[1] ? (<div className="relative mt-1">
             <img
               className="absolute right-3 bottom-2 max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
               src={friendsData[0].friendphotoURL}
@@ -88,7 +88,11 @@ function Group({
               src={friendsData[1].friendphotoURL}
               alt=""
             />
-          </div>
+          </div>): (<img
+              className=" max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
+              src={friendsData[0].friendphotoURL}
+              alt=""
+            />)}
           <div className="col-span-7 flex-col text-gray-800 dark:text-gray-300">
             <h1 className="truncate text-sm font-medium sm:text-lg">{name}</h1>
             <div className="flex text-xs">

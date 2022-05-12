@@ -11,6 +11,7 @@ import File from "./File";
 import { Friends, removeFriend } from "./friend/Friends";
 import Dropdown from "./Dropdown";
 import _ from "lodash";
+import GroupMember from "./friend/group/GroupMember";
 
 const Message = React.memo(() => {
   /*Init and Variables Section*/
@@ -201,64 +202,126 @@ const Message = React.memo(() => {
       getDownloadURL(fileImagesRef).then(async (url) => {
         setFileIsLoading(false);
         const { uid, photoURL } = auth.currentUser;
-        switch (fileType) {
-          case "image": {
-            await messagesRef.add({
-              image: url,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              uid,
-              photoURL,
-              sentFrom: user.uid,
-              sendTo: activeFriend,
-            });
-            break;
+        if (!groupId) {
+          switch (fileType) {
+            case "image": {
+              await messagesRef.add({
+                image: url,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, activeFriend],
+              });
+              break;
+            }
+            case "video": {
+              await messagesRef.add({
+                video: url,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, activeFriend],
+              });
+              break;
+            }
+            case "audio": {
+              await messagesRef.add({
+                audio: url,
+                fileName: snapshot.metadata.name,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, activeFriend],
+              });
+              break;
+            }
+            default: {
+              await messagesRef.add({
+                file: url,
+                fileName: snapshot.metadata.name,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, activeFriend],
+              });
+              break;
+            }
           }
-          case "video": {
-            await messagesRef.add({
-              video: url,
+          await userRef
+            .doc(activeFriend)
+            .collection("friends")
+            .doc(user.uid)
+            .update({
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              uid,
-              photoURL,
-              sentFrom: user.uid,
-              sendTo: activeFriend,
             });
-            break;
-          }
-          case "audio": {
-            await messagesRef.add({
-              audio: url,
-              fileName: snapshot.metadata.name,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              uid,
-              photoURL,
-              sentFrom: user.uid,
-              sendTo: activeFriend,
-            });
-            break;
-          }
-          default: {
-            await messagesRef.add({
-              file: url,
-              fileName: snapshot.metadata.name,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              uid,
-              photoURL,
-              sentFrom: user.uid,
-              sendTo: activeFriend,
-            });
-            break;
-          }
-        }
-        await userRef
-          .doc(activeFriend)
-          .collection("friends")
-          .doc(user.uid)
-          .update({
+          await userFriendRef.doc(activeFriend).update({
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
-        await userFriendRef.doc(activeFriend).update({
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+        } else {
+          switch (fileType) {
+            case "image": {
+              await messagesRef.add({
+                image: url,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, ...selectedGroupMembers],
+              });
+              break;
+            }
+            case "video": {
+              await messagesRef.add({
+                video: url,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, ...selectedGroupMembers],
+              });
+              break;
+            }
+            case "audio": {
+              await messagesRef.add({
+                audio: url,
+                fileName: snapshot.metadata.name,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, ...selectedGroupMembers],
+              });
+              break;
+            }
+            default: {
+              await messagesRef.add({
+                file: url,
+                fileName: snapshot.metadata.name,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uid,
+                photoURL,
+                sentFrom: user.uid,
+                sendTo: activeFriend,
+                owner: [user.uid, ...selectedGroupMembers],
+              });
+              break;
+            }
+          }
+          await groupRef.doc(groupId).update({
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        }
       });
     });
     currentMessageRef.current.scrollIntoView({
@@ -399,9 +462,8 @@ const Message = React.memo(() => {
               </button>
             </form>
             <div className="relative my-auto mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
-              {userFriendsCollectionData &&
-              userFriendsCollectionData.length !== 0 &&
-              usersId.includes(activeFriend) ? (
+              {mergedDataSorted &&
+              mergedDataSorted.length !== 0 ? (
                 <Dropdown
                   host={
                     <svg
@@ -440,6 +502,8 @@ const Message = React.memo(() => {
                         <p
                           onClick={() =>
                             removeFriend(
+                              groupId,
+                              groupRef,
                               usersCollectionDataLoading,
                               userRef,
                               usersCollectionData,
@@ -449,7 +513,7 @@ const Message = React.memo(() => {
                             )
                           }
                         >
-                          Remove Friend
+                          Remove {groupId ? 'Group' : 'Friend'}
                         </p>
                       </div>,
                     ],
@@ -523,10 +587,11 @@ const Message = React.memo(() => {
                 </svg>
                 {
                   <SlideOver2
+                    groupRef={groupRef}
+                    groupsCollectionData={groupsCollectionData}
+                    groupId={groupId}
                     messages={sortedMessages}
                     activeFriend={activeFriend}
-                    groupId={groupId}
-                    groupsCollectionData={groupsCollectionData}
                     state={showFile}
                     setState={setShowFile}
                   />
@@ -645,46 +710,11 @@ const Message = React.memo(() => {
             </h1>
           </a>
         </div>
-        <div className="text-md group active flex justify-center border-b-4 border-blue-600 py-4 text-center font-medium text-blue-600 dark:border-indigo-500 dark:text-indigo-500">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 origin-bottom-right transform-gpu transition group-hover:-rotate-6 group-hover:scale-110"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-            />
-          </svg>
-          <p>Members</p>
-        </div>
-        <ul className="mt-3 h-[64vh] space-y-2 overflow-auto">
-          {groupsCollectionData?.map((group) => {
-            return (
-              group?.groupId === groupId &&
-              group.friendsData.map((friendData, index) => {
-                return (
-                  <li
-                    key={index + 1}
-                    className="group flex cursor-default p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800"
-                  >
-                    <img
-                      src={friendData.friendphotoURL}
-                      className="max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
-                    />
-                    <h1 className="ml-2 truncate text-xs font-medium sm:text-sm">
-                      {friendData.friendName}
-                    </h1>
-                  </li>
-                );
-              })
-            );
-          })}
-        </ul>
+        {groupId && <GroupMember
+          groupRef={groupRef}
+          groupsCollectionData={groupsCollectionData}
+          groupId={groupId}
+        />}
       </div>
     </section>
   );
