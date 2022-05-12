@@ -71,13 +71,14 @@ export default function GroupForm({ state, setState, groupRef, friends, userId }
                         friends.map((friend, index) => {
                           if (friend.friendUid !== userId)
                             return (
-                              <label htmlFor="" key={index}>
+                                <label className="flex p-1" key={index}>
                                 <input
                                   type="checkbox"
                                   name="friend-name"
-                                  className="m-2 transition-all"
+                                  className="transition-all my-auto"
                                   onClick={() => handleSelectedFriends(friend)}
                                 />
+                                <img src={friend.friendphotoURL} className="w-5 h-5 rounded-full my-auto mx-1" />
                                 {friend.friendName}
                               </label>
                             );

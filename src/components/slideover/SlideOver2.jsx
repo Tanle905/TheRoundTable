@@ -1,6 +1,6 @@
 import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import File from "../File";
+import { File } from "../File";
 import GroupMember from "../friend/group/GroupMember";
 
 export default function SlideOver2({
@@ -55,16 +55,21 @@ export default function SlideOver2({
                         />
                       </div>
                       <a href="#" className="text-center">
-                        <h1 ref={focusRef} className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300">
+                        <h1
+                          ref={focusRef}
+                          className="text-md font-semibold text-blue-600 transition hover:underline dark:text-gray-300"
+                        >
                           View shared file...
                         </h1>
                       </a>
                     </div>
-                    {groupId && <GroupMember
-                      groupRef={groupRef}
-                      groupsCollectionData={groupsCollectionData}
-                      groupId={groupId}
-                    />}
+                    {groupId && (
+                      <GroupMember
+                        groupRef={groupRef}
+                        groupsCollectionData={groupsCollectionData}
+                        groupId={groupId}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

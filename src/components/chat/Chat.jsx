@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import firebase from "firebase/compat/app";
 import ChatMessage from "./ChatMessage";
 
@@ -11,6 +11,69 @@ firebase.initializeApp({
   appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
   measurementId: "G-3NRE8RWMTD",
 });
+
+function sendMessage(
+  e,
+  currentMessageRef,
+  messageValue,
+  groupId,
+  auth,
+  messagesRef,
+  user,
+  activeFriend,
+  selectedGroupMembers,
+  groupRef,
+  setMessageValue,
+  userRef,
+  userFriendRef
+) {
+  if (messageValue !== "") {
+    if (!groupId) {
+      e.preventDefault();
+      const { photoURL } = auth.currentUser;
+      const msgId = messagesRef.doc().id;
+      messagesRef.doc(msgId).set({
+        text: messageValue,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        id: msgId,
+        photoURL,
+        sentFrom: user.uid,
+        sendTo: activeFriend,
+        owner: [user.uid, activeFriend],
+        deleted: false,
+      });
+      userFriendRef.doc(activeFriend).update({
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      userRef.doc(activeFriend).collection("friends").doc(user.uid).update({
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      currentMessageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start",
+      });
+    } else {
+      e.preventDefault();
+      const { photoURL } = auth.currentUser;
+      const msgId = messagesRef.doc().id;
+      messagesRef.doc(msgId).set({
+        text: messageValue,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        id: msgId,
+        photoURL,
+        sentFrom: user.uid,
+        sendTo: activeFriend,
+        owner: [user.uid, ...selectedGroupMembers],
+        deleted: false,
+      });
+      groupRef.doc(groupId).update({
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+    setMessageValue("");
+  }
+}
 const Chat = React.memo(
   ({
     auth,
@@ -56,4 +119,4 @@ const Chat = React.memo(
   }
 );
 
-export default Chat;
+export { Chat, sendMessage };

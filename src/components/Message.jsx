@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import firebase from "firebase/compat/app";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import SlideOver from "./slideover/SlideOver";
 import SlideOver2 from "./slideover/SlideOver2";
-import Chat from "./chat/Chat";
-import File from "./File";
+import { Chat, sendMessage } from "./chat/Chat";
+import { File, fileHandle } from "./File";
 import { Friends, removeFriend } from "./friend/Friends";
 import Dropdown from "./Dropdown";
 import _ from "lodash";
@@ -33,10 +33,9 @@ const Message = React.memo(() => {
   const userRef = firestore().collection("users");
   const [usersCollectionData, usersCollectionDataLoading] =
     useCollectionData(userRef);
-  const usersId =
-    usersCollectionData && usersCollectionData.map((user) => user.uid);
 
   //fileHandle init and variables
+  const [fileIsLoading, setFileIsLoading] = useState(false);
   const storage = getStorage(firebaseApp);
   const [showFile, setShowFile] = useState(false);
 
@@ -49,7 +48,7 @@ const Message = React.memo(() => {
     useCollectionData(userFriendRef.orderBy("createdAt", "desc"));
   const [activeFriend, setActiveFriend] = useState("");
   const [activeName, setActiveName] = useState([""]);
-  //End of friend init and variables
+
   //Group init and variables
   const groupRef = firestore().collection("groups");
   const [groupsCollectionData] = useCollectionData(groupRef);
@@ -59,7 +58,7 @@ const Message = React.memo(() => {
     : null;
   const selectedGroupMembers =
     selectedGroup !== null && selectedGroup[0] ? selectedGroup[0].members : "";
-  //End of group init and variables
+
   // Messages init and variables
   const [filterMessageResult, setFilterMessageResult] = useState("");
   const messagesRef = firestore().collection("messages");
@@ -70,6 +69,7 @@ const Message = React.memo(() => {
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
   const sortedMessages = _.orderBy(messages, (o) => o.createdAt, "asc");
   let currentMessageRef = useRef();
+  
   /*END OF Init and Variables Section*/
 
   const mergedData = userFriendsCollectionData &&
@@ -78,26 +78,6 @@ const Message = React.memo(() => {
       ...groupsCollectionData,
     ];
   const mergedDataSorted = _.orderBy(mergedData, (o) => o.createdAt, "desc");
-  //WebRTC init and variables
-  // const servers = {
-  //   iceservers: [
-  //     {
-  //       urls: [
-  //         "stun.l.google.com:19302",
-  //         "stun3.l.google.com:19302",
-  //         "stunserver.org",
-  //       ],
-  //     },
-  //   ],
-  //   iceCandidatePoolSize: 10,
-  // };
-  // const [pc, setPc] = useState(new RTCPeerConnection(servers));
-  // var localStream = null;
-  // let remoteStream = null;
-  // const [isCalling, setIsCalling] = useState(false);
-  // let localStreamRef = useRef(null);
-  // let remoteStreamRef = useRef(null);
-  //End of WebRTC init and variables
 
   /*Component Section*/
   //Friends Section ( FriendsList and addFriend)
@@ -133,224 +113,9 @@ const Message = React.memo(() => {
       inline: "start",
     });
   }, [activeFriend]);
-  const sendMessage = async (e) => {
-    if (messageValue !== "") {
-      if (!groupId) {
-        e.preventDefault();
-        const { photoURL } = auth.currentUser;
-        const msgId = messagesRef.doc().id;
-        messagesRef.doc(msgId).set({
-          text: messageValue,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          id: msgId,
-          photoURL,
-          sentFrom: user.uid,
-          sendTo: activeFriend,
-          owner: [user.uid, activeFriend],
-          deleted: false,
-        });
-        await userFriendRef.doc(activeFriend).update({
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        await userRef
-          .doc(activeFriend)
-          .collection("friends")
-          .doc(user.uid)
-          .update({
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        currentMessageRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "start",
-        });
-      } else {
-        e.preventDefault();
-        const { photoURL } = auth.currentUser;
-        const msgId = messagesRef.doc().id;
-        messagesRef.doc(msgId).set({
-          text: messageValue,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          id: msgId,
-          photoURL,
-          sentFrom: user.uid,
-          sendTo: activeFriend,
-          owner: [user.uid, ...selectedGroupMembers],
-          deleted: false,
-        });
-        groupRef.doc(groupId).update({
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-      }
-      setMessageValue("");
-    }
-  };
   //END OF Chat section
 
   //fileHandle section
-  const [fileIsLoading, setFileIsLoading] = useState(false);
-  const fileHandle = async (event) => {
-    event.preventDefault();
-    setFileIsLoading(true);
-    const file = event.target.files[0];
-    const fileImagesRef = ref(storage, "files/" + file.name);
-    await uploadBytes(fileImagesRef, file).then((snapshot) => {
-      const fileType = snapshot.metadata.contentType.slice(
-        0,
-        snapshot.metadata.contentType.indexOf("/")
-      );
-      getDownloadURL(fileImagesRef).then(async (url) => {
-        setFileIsLoading(false);
-        const { uid, photoURL } = auth.currentUser;
-        if (!groupId) {
-          switch (fileType) {
-            case "image": {
-              await messagesRef.add({
-                image: url,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, activeFriend],
-              });
-              break;
-            }
-            case "video": {
-              await messagesRef.add({
-                video: url,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, activeFriend],
-              });
-              break;
-            }
-            case "audio": {
-              await messagesRef.add({
-                audio: url,
-                fileName: snapshot.metadata.name,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, activeFriend],
-              });
-              break;
-            }
-            default: {
-              await messagesRef.add({
-                file: url,
-                fileName: snapshot.metadata.name,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, activeFriend],
-              });
-              break;
-            }
-          }
-          await userRef
-            .doc(activeFriend)
-            .collection("friends")
-            .doc(user.uid)
-            .update({
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-          await userFriendRef.doc(activeFriend).update({
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        } else {
-          switch (fileType) {
-            case "image": {
-              await messagesRef.add({
-                image: url,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, ...selectedGroupMembers],
-              });
-              break;
-            }
-            case "video": {
-              await messagesRef.add({
-                video: url,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, ...selectedGroupMembers],
-              });
-              break;
-            }
-            case "audio": {
-              await messagesRef.add({
-                audio: url,
-                fileName: snapshot.metadata.name,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, ...selectedGroupMembers],
-              });
-              break;
-            }
-            default: {
-              await messagesRef.add({
-                file: url,
-                fileName: snapshot.metadata.name,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                uid,
-                photoURL,
-                sentFrom: user.uid,
-                sendTo: activeFriend,
-                owner: [user.uid, ...selectedGroupMembers],
-              });
-              break;
-            }
-          }
-          await groupRef.doc(groupId).update({
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-      });
-    });
-    currentMessageRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "start",
-    });
-  };
-  //END OF fileHandle section
-  //WebRTC section
-  // const videoCallHandle = async () => {
-  //   localStream = await navigator.mediaDevices.getUserMedia({
-  //     video: true,
-  //   });
-
-  //   remoteStream = new MediaStream();
-  //   //Push track from local stram to peer connection
-  //   localStream.getTracks().forEach((track) => {
-  //     pc.addTrack(track, localStream);
-  //   });
-
-  //   //Pull tracks from remote stream, add to video stream
-  //   pc.ontrack = (event) => {
-  //     event.streams[0].getTracks().forEach((track) => {
-  //       remoteStream.addTrack(track);
-  //     });
-  //   };
-  // };
-  //End of WebRTC section
 
   /*END OF Component Section*/
   return (
@@ -462,8 +227,7 @@ const Message = React.memo(() => {
               </button>
             </form>
             <div className="relative my-auto mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
-              {mergedDataSorted &&
-              mergedDataSorted.length !== 0 ? (
+              {mergedDataSorted && mergedDataSorted.length !== 0 ? (
                 <Dropdown
                   host={
                     <svg
@@ -513,7 +277,7 @@ const Message = React.memo(() => {
                             )
                           }
                         >
-                          Remove {groupId ? 'Group' : 'Friend'}
+                          Remove {groupId ? "Group" : "Friend"}
                         </p>
                       </div>,
                     ],
@@ -522,53 +286,6 @@ const Message = React.memo(() => {
               ) : (
                 ""
               )}
-              {/* {userFriendsCollectionData &&
-                userFriendsCollectionData.length !== 0 && (
-                  <React.Fragment>
-                    <button>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-7 w-7 transition hover:-translate-y-1 sm:h-8 sm:w-8"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      name="video-call"
-                      onClick={async () => {
-                        await videoCallHandle();
-                        setIsCalling(!isCalling);
-                        let localVideo = localStreamRef.current;
-                        let remoteVideo = remoteStreamRef.current;
-                        localVideo.srcObject = localStream;
-                        remoteVideo.srcObject = remoteStream;
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 transition hover:-translate-y-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </button>
-                  </React.Fragment>
-                )} */}
               <div className="place-self-end truncate overflow-ellipsis p-1 text-lg sm:text-3xl lg:hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -609,28 +326,50 @@ const Message = React.memo(() => {
               messagesRef={messagesRef}
             />
             <div ref={currentMessageRef}></div>
-            {/* {isCalling && (
-              <RTC
-                pc={pc}
-                setPc={setPc}
-                localStreamRef={localStreamRef}
-                remoteStreamRef={remoteStreamRef}
-                activeFriend={activeFriend}
-              />
-            )} */}
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
           <div className=" fixed bottom-0 row-start-6 mx-1 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
             <form
-              onSubmit={sendMessage}
+              onSubmit={(e) =>
+                sendMessage(
+                  e,
+                  currentMessageRef,
+                  messageValue,
+                  groupId,
+                  auth,
+                  messagesRef,
+                  user,
+                  activeFriend,
+                  selectedGroupMembers,
+                  groupRef,
+                  setMessageValue,
+                  userRef,
+                  userFriendRef
+                )
+              }
               className="flex justify-center sm:px-3 xl:px-0"
             >
               <input
                 type="file"
                 className="hidden"
                 id="selectedFile"
-                onChange={fileHandle}
+                onChange={(e) =>
+                  fileHandle(
+                    e,
+                    setFileIsLoading,
+                    storage,
+                    groupId,
+                    messagesRef,
+                    currentMessageRef,
+                    user,
+                    activeFriend,
+                    selectedGroupMembers,
+                    groupRef,
+                    userRef,
+                    userFriendRef
+                  )
+                }
               />
               <label
                 className="my-auto mx-1 cursor-pointer text-gray-600 transition hover:rotate-12 dark:text-gray-400 sm:mr-4"
@@ -710,11 +449,13 @@ const Message = React.memo(() => {
             </h1>
           </a>
         </div>
-        {groupId && <GroupMember
-          groupRef={groupRef}
-          groupsCollectionData={groupsCollectionData}
-          groupId={groupId}
-        />}
+        {groupId && (
+          <GroupMember
+            groupRef={groupRef}
+            groupsCollectionData={groupsCollectionData}
+            groupId={groupId}
+          />
+        )}
       </div>
     </section>
   );

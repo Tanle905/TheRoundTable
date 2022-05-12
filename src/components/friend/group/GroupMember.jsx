@@ -61,35 +61,18 @@ export default function GroupMember({
                   <h1 className="ml-2 mr-3 truncate text-xs font-medium sm:text-sm">
                     {friendData.friendName}
                   </h1>
-                  <Dropdown
-                    host={
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="my-auto h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                        />
-                      </svg>
-                    }
-                    position="top-5"
-                    contents={{
-                      options: [
-                        <div
-                          className="flex space-x-3"
-                          onClick={() =>
-                            deleteMemberHandle(friendData.friendUid)
-                          }
-                        >
+                  {group.admin === friendData.friendUid && (
+                    <span className="mb-5 mr-3 rounded-md p-1 text-xs font-semibold text-yellow-500 ring-2 ring-yellow-600">
+                      Admin
+                    </span>
+                  )}
+                  {group.admin !== friendData.friendUid &&
+                    firebase.auth().currentUser.uid === group.admin && (
+                      <Dropdown
+                        host={
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
+                            className="my-auto h-5 w-5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -98,14 +81,39 @@ export default function GroupMember({
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                              d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
                             />
                           </svg>
-                          <p>Remove Member</p>
-                        </div>,
-                      ],
-                    }}
-                  />
+                        }
+                        position="top-5"
+                        contents={{
+                          options: [
+                            <div
+                              className="flex space-x-3"
+                              onClick={() =>
+                                deleteMemberHandle(friendData.friendUid)
+                              }
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                                />
+                              </svg>
+                              <p>Remove Member</p>
+                            </div>,
+                          ],
+                        }}
+                      />
+                    )}
                 </li>
               );
             })
