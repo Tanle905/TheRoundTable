@@ -69,13 +69,16 @@ const Message = React.memo(() => {
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
   const sortedMessages = _.orderBy(messages, (o) => o.createdAt, "asc");
   let currentMessageRef = useRef();
-  
+
   /*END OF Init and Variables Section*/
 
   const mergedData = userFriendsCollectionData &&
     groupsCollectionData && [
-      ...userFriendsCollectionData,
-      ...groupsCollectionData,
+      ...userFriendsCollectionData && userFriendsCollectionData.filter(userFriend=> userFriend.isFriend),
+      ...(groupsCollectionData &&
+        groupsCollectionData.filter((userGroup) =>
+          userGroup.members.includes(auth.currentUser.uid)
+        )),
     ];
   const mergedDataSorted = _.orderBy(mergedData, (o) => o.createdAt, "desc");
 
@@ -116,7 +119,6 @@ const Message = React.memo(() => {
   //END OF Chat section
 
   //fileHandle section
-
   /*END OF Component Section*/
   return (
     <section className="grid grid-cols-12 bg-gray-50 dark:bg-slate-900">
