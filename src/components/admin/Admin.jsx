@@ -8,7 +8,7 @@ export default function Admin({ username, password }) {
   const userRef = firebase.firestore().collection("users");
   const [usersCollectionData] = useCollectionData(userRef);
   const messagesRef = firebase.firestore().collection("messages");
-  const messagesQuery = messagesRef.orderBy("createdAt").limit(25);
+  const messagesQuery = messagesRef.orderBy("createdAt").limit(1000);
   const [messages] = useCollectionData(messagesQuery, { idField: "id" });
   let navigate = useNavigate();
   const [active, setActive] = useState("users-button");
@@ -54,7 +54,7 @@ export default function Admin({ username, password }) {
           />
           {text ? (
             <p
-              className={`max-w-[15rem] rounded-md p-2 py-1 sm:max-w-xl color`}
+              className={`max-w-[15rem] rounded-md p-2 py-1 sm:max-w-xl bg-blue-500`}
             >
               {text}
             </p>

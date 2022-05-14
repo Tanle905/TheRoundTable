@@ -5,7 +5,10 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import SignIn from "./SignIn";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useDocumentData } from "react-firebase-hooks/firestore";
+import {
+  useCollectionData,
+  useDocumentData,
+} from "react-firebase-hooks/firestore";
 
 const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
@@ -23,6 +26,7 @@ const App = () => {
   const userRef = firebase.firestore().collection("users");
   const userDocRef =
     user && firebase.firestore().collection("users").doc(user.uid);
+  const [usersCollectionData] = useCollectionData(userRef);
   const [userDocumentData, userDocumentDataIsLoading] =
     useDocumentData(userDocRef);
   const addUser = () => {
@@ -37,25 +41,31 @@ const App = () => {
   };
 
   let content;
-  if (!authLoading && user && !userDocumentDataIsLoading) {
-    if (
-      userDocumentData !== undefined &&
-      !userDocumentData.banned
-    ) {
+  if (
+    !authLoading &&
+    user &&
+    !userDocumentDataIsLoading &&
+    usersCollectionData
+  ) {
+    console.log();
+    if (userDocumentData !== undefined && !userDocumentData.banned) {
       content = (
         <div className="h-screen overflow-hidden">
           <Header />
           <Message />
         </div>
       );
-    } else if (
-      userDocumentData !== undefined &&
-      userDocumentData.banned
-    ) {
+    } else if (userDocumentData !== undefined && userDocumentData.banned) {
       alert("you have been banned");
       auth.signOut();
       content = <SignIn />;
-    } else if (!userDocumentDataIsLoading && userDocumentData === undefined) {
+    } else if (
+      !userDocumentDataIsLoading &&
+      userDocumentData === undefined &&
+      !usersCollectionData
+        .map((user) => user.uid)
+        .includes(auth.currentUser.uid)
+    ) {
       addUser();
     }
   } else if (!user && !authLoading) {
