@@ -88,19 +88,23 @@ const Chat = React.memo(
         {messages &&
           messages.map(
             (msg, index) =>
-              (msg.text &&
-                msg.text.toLowerCase().includes(filterMessageResult) && (
-                  <ChatMessage
-                    key={msg.id}
-                    auth={auth}
-                    index={index}
-                    message={msg}
-                    messages={messages}
-                    activeFriend={activeFriend}
-                    groupId={groupId}
-                    messagesRef={messagesRef}
-                  />
-                )) ||
+              (((msg.text &&
+                msg.text.toLowerCase().includes(filterMessageResult)) ||
+                (msg.fileName &&
+                  msg.fileName
+                    .toLowerCase()
+                    .includes(filterMessageResult))) && (
+                <ChatMessage
+                  key={msg.id}
+                  auth={auth}
+                  index={index}
+                  message={msg}
+                  messages={messages}
+                  activeFriend={activeFriend}
+                  groupId={groupId}
+                  messagesRef={messagesRef}
+                />
+              )) ||
               (filterMessageResult === "" && (
                 <ChatMessage
                   key={msg.id}

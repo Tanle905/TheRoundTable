@@ -11,6 +11,7 @@ import { File, fileHandle } from "./File";
 import { Friends, removeFriend } from "./friend/Friends";
 import Dropdown from "./Dropdown";
 import _ from "lodash";
+import { addMember } from "./friend/group/GroupList";
 import GroupMember from "./friend/group/GroupMember";
 
 const Message = React.memo(() => {
@@ -50,6 +51,7 @@ const Message = React.memo(() => {
   const [activeName, setActiveName] = useState([""]);
 
   //Group init and variables
+  const [uidValue, setUidValue] = useState("");
   const groupRef = firestore().collection("groups");
   const [groupsCollectionData] = useCollectionData(groupRef);
   const [groupId, setGroupId] = useState("");
@@ -74,7 +76,8 @@ const Message = React.memo(() => {
 
   const mergedData = userFriendsCollectionData &&
     groupsCollectionData && [
-      ...userFriendsCollectionData && userFriendsCollectionData.filter(userFriend=> userFriend.isFriend),
+      ...(userFriendsCollectionData &&
+        userFriendsCollectionData.filter((userFriend) => userFriend.isFriend)),
       ...(groupsCollectionData &&
         groupsCollectionData.filter((userGroup) =>
           userGroup.members.includes(auth.currentUser.uid)
@@ -228,6 +231,46 @@ const Message = React.memo(() => {
                 </svg>
               </button>
             </form>
+            {groupId && (
+              <form className="group relative my-auto ml-auto py-3">
+                <input
+                  key="uidInput"
+                  className="form-input my-auto h-7 w-3 rounded-md border-0 bg-transparent font-semibold duration-200 placeholder:text-sm hover:border-2 focus:pr-8 group-hover:w-36 dark:text-gray-50 dark:placeholder:text-gray-400 sm:w-44 sm:group-hover:w-96 xl:h-12"
+                  type="text"
+                  value={uidValue}
+                  onChange={(e) => setUidValue(e.target.value)}
+                  placeholder="Add a Friend UID"
+                />
+                <button
+                  className="absolute right-2 bottom-6 text-gray-600 transition-all group-hover:rotate-180 dark:text-gray-50"
+                  type="submit"
+                  onClick={(event) =>
+                    addMember(
+                      event,
+                      usersCollectionData,
+                      groupsCollectionData,
+                      groupRef,
+                      groupId,
+                      uidValue,
+                      setUidValue
+                    )
+                  }
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </form>
+            )}
             <div className="relative my-auto mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
               {mergedDataSorted && mergedDataSorted.length !== 0 ? (
                 <Dropdown
@@ -249,40 +292,83 @@ const Message = React.memo(() => {
                   }
                   position="top-5"
                   contents={{
-                    options: [
-                      <div className="flex space-x-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
-                          />
-                        </svg>
-                        <p
-                          onClick={() =>
-                            removeFriend(
-                              groupId,
-                              groupRef,
-                              usersCollectionDataLoading,
-                              userRef,
-                              usersCollectionData,
-                              userFriendRef,
-                              auth,
-                              activeFriend
-                            )
-                          }
-                        >
-                          Remove {groupId ? "Group" : "Friend"}
-                        </p>
-                      </div>,
-                    ],
+                    options:
+                      groupsCollectionData &&
+                      groupsCollectionData.filter(
+                        (group) =>
+                          group.groupId === groupId &&
+                          group.admin === auth.currentUser.uid
+                      ).length !== 0
+                        ? [
+                            <div className="flex space-x-3">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                                />
+                              </svg>
+                              <p
+                                onClick={() =>
+                                  removeFriend(
+                                    groupId,
+                                    groupRef,
+                                    groupsCollectionData,
+                                    usersCollectionDataLoading,
+                                    userRef,
+                                    usersCollectionData,
+                                    userFriendRef,
+                                    auth,
+                                    activeFriend
+                                  )
+                                }
+                              >
+                                Remove {groupId ? "Group" : "Friend"}
+                              </p>
+                            </div>,
+                          ]
+                        : [
+                            <div className="flex space-x-3">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="my-auto h-5 w-5 transition hover:text-indigo-400 dark:text-indigo-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                                />
+                              </svg>
+                              <p
+                                onClick={() =>
+                                  removeFriend(
+                                    groupId,
+                                    groupRef,
+                                    groupsCollectionData,
+                                    usersCollectionDataLoading,
+                                    userRef,
+                                    usersCollectionData,
+                                    userFriendRef,
+                                    auth,
+                                    activeFriend
+                                  )
+                                }
+                              >
+                                {groupId ? "Leave Group" : "Remove Friend"}
+                              </p>
+                            </div>,
+                          ],
                   }}
                 />
               ) : (

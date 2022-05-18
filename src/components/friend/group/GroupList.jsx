@@ -12,14 +12,57 @@ firebase.initializeApp({
   measurementId: "G-3NRE8RWMTD",
 });
 
-const addGroup = (
+function addMember(
+  event,
+  usersCollectionData,
+  groupsCollectionData,
+  groupRef,
+  groupId,
+  uidValue,
+  setUidValue
+) {
+  event.preventDefault();
+  if (
+    usersCollectionData.filter((data) => data.uid === uidValue).length !== 0 &&
+    groupsCollectionData.filter((group) => group.members.includes(uidValue))
+      .length === 0
+  ) {
+    const userData = usersCollectionData.filter(
+      (data) => data.uid === uidValue
+    )[0];
+    groupRef.doc(groupId).update({
+      members: [
+        ...groupsCollectionData.filter((group) => group.groupId === groupId)[0]
+          .members,
+        uidValue,
+      ],
+      friendsData: [
+        ...groupsCollectionData.filter((group) => group.groupId === groupId)[0]
+          .friendsData,
+        {
+          friendEmail: userData.email,
+          friendName: userData.name,
+          friendUid: userData.uid,
+          friendphotoURL: userData.photoURL,
+        },
+      ],
+    });
+  } else if (
+    groupsCollectionData.filter((group) => group.members.includes(uidValue))
+      .length !== 0
+  )
+    alert("user already exist");
+  setUidValue("");
+}
+
+function addGroup(
   event,
   groupRef,
   groupName,
   setGroupName,
   selectedFriends,
   friendsDatas
-) => {
+) {
   event.preventDefault();
   const groupId = groupRef.doc().id;
   if (groupName != "" && selectedFriends.length !== 1) {
@@ -36,7 +79,7 @@ const addGroup = (
     });
     setGroupName("");
   } else alert("Please input a valid name or friend");
-};
+}
 
 function Group({
   group,
@@ -91,10 +134,16 @@ function Group({
                 alt=""
               />
             </div>
-          ) : (
+          ) : friendsData[0] ? (
             <img
               className=" max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
               src={friendsData[0].friendphotoURL}
+              alt=""
+            />
+          ) : (
+            <img
+              className=" max-h-10 w-10 rounded-full ring-blue-500 transition group-hover:ring-4 dark:ring-indigo-400"
+              src={firebase.auth().currentUser.photoURL}
               alt=""
             />
           )}
@@ -145,4 +194,4 @@ function Group({
   else return "";
 }
 
-export { addGroup, Group };
+export { addMember, addGroup, Group };

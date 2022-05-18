@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import GroupForm from "./group/GroupForm";
 import { Group } from "./group/GroupList";
 import FriendList from "./FriendList";
@@ -7,6 +7,7 @@ import friendSvg from "../../svg/groupImg.svg";
 const removeFriend = (
   groupId,
   groupRef,
+  groupsCollectionData,
   usersDataLoading,
   userRef,
   usersCollectionData,
@@ -30,8 +31,24 @@ const removeFriend = (
             });
         }
       });
-    } else {
+    } else if (
+      groupsCollectionData.filter(
+        (group) =>
+          group.groupId === groupId && group.admin === auth.currentUser.uid
+      ).length !== 0
+    ) {
       groupRef.doc(groupId).delete();
+    } else {
+      groupRef.doc(groupId).update({
+        members: groupsCollectionData
+          .filter((group) => group.groupId === groupId)[0]
+          .members.filter((member) => member !== auth.currentUser.uid),
+        friendsData: groupsCollectionData
+          .filter((group) => group.groupId === groupId)[0]
+          .friendsData.filter(
+            (friendData) => friendData.friendUid !== auth.currentUser.uid
+          ),
+      });
     }
   }
 };
