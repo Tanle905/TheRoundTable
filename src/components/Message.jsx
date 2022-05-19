@@ -202,7 +202,7 @@ const Message = React.memo(() => {
             </div>
             <form className="group relative ml-2 lg:my-auto">
               <input
-                className="form-input h-7 w-3 rounded-md border-0 bg-transparent font-semibold duration-200 placeholder:text-sm hover:border-2 focus:pr-8 group-hover:w-36 dark:text-gray-50 dark:placeholder:text-gray-400 sm:w-44 sm:group-hover:w-96 xl:h-12"
+                className="form-input h-7 w-3 rounded-md border-0 border-gray-50 bg-transparent font-semibold duration-200 placeholder:text-sm hover:border-2 focus:pr-8 group-hover:w-40 dark:border-gray-300/20 dark:text-gray-50 dark:placeholder:text-gray-400 sm:w-44 sm:group-hover:w-96 xl:h-12 xl:border-2"
                 type="search"
                 name="search"
                 value={filterMessageResult}
@@ -231,47 +231,47 @@ const Message = React.memo(() => {
                 </svg>
               </button>
             </form>
-            {groupId && (
-              <form className="group relative my-auto ml-auto py-3">
-                <input
-                  key="uidInput"
-                  className="form-input my-auto h-7 w-3 rounded-md border-0 bg-transparent font-semibold duration-200 placeholder:text-sm hover:border-2 focus:pr-8 group-hover:w-36 dark:text-gray-50 dark:placeholder:text-gray-400 sm:w-44 sm:group-hover:w-96 xl:h-12"
-                  type="text"
-                  value={uidValue}
-                  onChange={(e) => setUidValue(e.target.value)}
-                  placeholder="Add a Friend UID"
-                />
-                <button
-                  className="absolute right-2 bottom-6 text-gray-600 transition-all group-hover:rotate-180 dark:text-gray-50"
-                  type="submit"
-                  onClick={(event) =>
-                    addMember(
-                      event,
-                      usersCollectionData,
-                      groupsCollectionData,
-                      groupRef,
-                      groupId,
-                      uidValue,
-                      setUidValue
-                    )
-                  }
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+            <div className="relative my-auto mr-2 ml-auto flex space-x-2 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
+              {groupId && (
+                <form className="group relative my-auto ml-auto">
+                  <input
+                    key="uidInput"
+                    className="form-input my-auto w-1 rounded-md border-0 border-gray-600/20 bg-transparent font-semibold duration-200 placeholder:text-sm hover:border-2 focus:pr-8 group-hover:w-44 dark:border-gray-300/20 dark:text-gray-50 dark:placeholder:text-gray-400 xl:h-12 xl:w-44 xl:border-2 xl:group-hover:w-64"
+                    type="text"
+                    value={uidValue}
+                    onChange={(e) => setUidValue(e.target.value)}
+                    placeholder="Add uid to group..."
+                  />
+                  <button
+                    className="absolute right-2 top-2 text-gray-600 transition-all group-hover:rotate-180 dark:text-gray-50 xl:top-3"
+                    type="submit"
+                    onClick={(event) =>
+                      addMember(
+                        event,
+                        usersCollectionData,
+                        groupsCollectionData,
+                        groupRef,
+                        groupId,
+                        uidValue,
+                        setUidValue
+                      )
+                    }
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </form>
-            )}
-            <div className="relative my-auto mr-2 ml-auto flex space-x-3 text-blue-600 dark:text-indigo-500 sm:mr-6 sm:space-x-5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </form>
+              )}
               {mergedDataSorted && mergedDataSorted.length !== 0 ? (
                 <Dropdown
                   host={

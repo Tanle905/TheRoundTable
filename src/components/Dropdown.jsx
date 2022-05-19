@@ -7,8 +7,8 @@ function classNames(...classes) {
 
 export default function Dropdown({ host, contents, position }) {
   return (
-    <Menu as="div">
-      <div>
+    <Menu as="div" className={`my-auto`}>
+      <div className="my-auto">
         <Menu.Button>{host}</Menu.Button>
       </div>
 
