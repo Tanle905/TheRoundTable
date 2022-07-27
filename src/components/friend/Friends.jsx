@@ -202,6 +202,7 @@ const Friends = React.memo(function Friends({
           <p
             className="my-1 cursor-pointer place-self-center rounded-xl bg-blue-200 p-1 text-gray-800 transition hover:bg-slate-500 dark:bg-slate-700 dark:text-gray-200"
             onClick={() => {
+              alert("Copied to clipboard")
               navigator.clipboard.writeText(auth.currentUser.uid);
             }}
           >

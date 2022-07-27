@@ -3,7 +3,6 @@ import firebase from "firebase/compat/app";
 import { getStorage } from "firebase/storage";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import SlideOver from "./slideover/SlideOver";
 import SlideOver2 from "./slideover/SlideOver2";
 import { Chat, sendMessage } from "./chat/Chat";
@@ -13,24 +12,16 @@ import Dropdown from "./Dropdown";
 import _ from "lodash";
 import { addMember } from "./friend/group/GroupList";
 import GroupMember from "./friend/group/GroupMember";
+import { AuthContext, firebaseApp } from "./App";
+import { useContext } from "react";
 
 const Message = React.memo(() => {
+  const firestore = firebase.firestore;
   /*Init and Variables Section*/
   //Firebase init
-  const firebaseApp = firebase.initializeApp({
-    apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
-    authDomain: "the-round-table-ffc3f.firebaseapp.com",
-    projectId: "the-round-table-ffc3f",
-    storageBucket: "the-round-table-ffc3f.appspot.com",
-    messagingSenderId: "551826854387",
-    appId: "1:551826854387:web:7cdd75b6cbc985bc274286",
-    measurementId: "G-3NRE8RWMTD",
-  });
 
   //Users init and variables
-  const firestore = firebase.firestore;
-  const auth = firebase.auth();
-  const [user] = useAuthState(auth);
+  const { auth, user } = useContext(AuthContext);
   const userRef = firestore().collection("users");
   const [usersCollectionData, usersCollectionDataLoading] =
     useCollectionData(userRef);
@@ -89,26 +80,18 @@ const Message = React.memo(() => {
   //Friends Section ( FriendsList and addFriend)
   useEffect(() => {
     setActiveFriend(
-      (mergedDataSorted != null &&
-        mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].friendUid) ||
+      (mergedDataSorted?.length != 0 && mergedDataSorted[0].friendUid) ||
         (mergedDataSorted != null &&
           mergedDataSorted.length != 0 &&
           mergedDataSorted[0].groupId)
     );
     setActiveName(
-      (mergedDataSorted != null &&
-        mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].friendName) ||
+      (mergedDataSorted?.length != 0 && mergedDataSorted[0].friendName) ||
         (mergedDataSorted != null &&
           mergedDataSorted.length != 0 &&
           mergedDataSorted[0].name)
     );
-    setGroupId(
-      mergedDataSorted != null &&
-        mergedDataSorted.length != 0 &&
-        mergedDataSorted[0].groupId
-    );
+    setGroupId(mergedDataSorted?.length != 0 && mergedDataSorted[0].groupId);
   }, [groupsCollectionData, userFriendsCollectionData]);
   //END OF Friends Section ( FriendsList and addFriend)
 

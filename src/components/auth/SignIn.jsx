@@ -1,14 +1,15 @@
 import firebase from "firebase/compat/app";
-import "firebase/compat/firestore";
-import "firebase/compat/auth";
-import GoogleIco from "../svg/google_ico.svg";
+import GoogleIco from "../../svg/google_ico.svg";
+import { useContext } from "react";
+import { AuthContext } from "../App";
 
 export default function SignIn() {
-  const auth = firebase.auth();
-  const signInWithGoggle = () => {
+  const { auth } = useContext(AuthContext);
+  
+  function signInWithGoggle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider);
-  };
+  }
 
   return (
     <div className="flex min-h-screen justify-center space-y-3 bg-gray-100 dark:bg-slate-900">

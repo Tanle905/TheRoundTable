@@ -3,12 +3,15 @@ import Message from "./Message";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
-import SignIn from "./SignIn";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
   useCollectionData,
   useDocumentData,
 } from "react-firebase-hooks/firestore";
+import Loading from "./animation/Loading";
+import React from "react";
+import SignIn from "./auth/SignIn";
+import { useState } from "react";
 
 const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyBa68wqeX9-ztnkex7aIT1Xs9eXplNG7qk",
@@ -20,16 +23,23 @@ const firebaseApp = firebase.initializeApp({
   measurementId: "G-3NRE8RWMTD",
 });
 
+const AuthContext = React.createContext();
+
 const App = () => {
   const auth = firebase.auth();
   const [user, authLoading] = useAuthState(auth);
+  const [isDarkTheme, setIsDarkTheme] = useState(
+    localStorage.getItem("isDarkTheme")
+  );
   const userRef = firebase.firestore().collection("users");
   const userDocRef =
     user && firebase.firestore().collection("users").doc(user.uid);
   const [usersCollectionData] = useCollectionData(userRef);
   const [userDocumentData, userDocumentDataIsLoading] =
     useDocumentData(userDocRef);
-  const addUser = () => {
+  let content;
+
+  function addUser() {
     if (!authLoading) {
       userRef.doc(user.uid).set({
         email: user.email,
@@ -38,46 +48,42 @@ const App = () => {
         photoURL: user.photoURL,
       });
     }
-  };
+  }
 
-  let content;
-  if (
-    !authLoading &&
-    user &&
-    !userDocumentDataIsLoading &&
-    usersCollectionData
-  ) {
-    console.log();
-    if (userDocumentData !== undefined && !userDocumentData.banned) {
-      content = (
-        <div className="h-screen overflow-hidden">
-          <Header />
-          <Message />
-        </div>
-      );
-    } else if (userDocumentData !== undefined && userDocumentData.banned) {
-      alert("you have been banned");
-      auth.signOut();
-      content = <SignIn />;
-    } else if (
+  if (authLoading) {
+    content = <Loading />;
+  } else if (!user) {
+    content = <SignIn />;
+  } else {
+    if (
       !userDocumentDataIsLoading &&
-      userDocumentData === undefined &&
+      !userDocumentData &&
       !usersCollectionData
-        .map((user) => user.uid)
+        ?.map((user) => user.uid)
         .includes(auth.currentUser.uid)
     ) {
       addUser();
     }
-  } else if (!user && !authLoading) {
-    content = <SignIn />;
-  } else {
-    content = (
-      <div className="flex h-screen place-content-center bg-gray-50 dark:bg-slate-900">
-        <div className="my-auto h-24 w-24 animate-bounce rounded-lg bg-blue-500 shadow-2xl dark:bg-indigo-500 dark:shadow-indigo-800/75"></div>
-      </div>
-    );
+    if (!userDocumentData?.banned) {
+      content = (
+        <div className="h-screen overflow-hidden">
+          <AuthContext.Provider value={{ auth, user }}>
+            <Header setIsDarkTheme={setIsDarkTheme} />
+            <Message />
+          </AuthContext.Provider>
+        </div>
+      );
+    } else {
+      alert("You have been banned. Please contact admin for more info.");
+      auth.signOut();
+      content = <SignIn />;
+    }
   }
-  return <div>{content}</div>;
+  return (
+    <AuthContext.Provider value={{ auth, user }}>
+      <div className={isDarkTheme ? "dark" : "light"}>{content}</div>
+    </AuthContext.Provider>
+  );
 };
 
-export { App, firebaseApp };
+export { App, firebaseApp, AuthContext };

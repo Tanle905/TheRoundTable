@@ -1,20 +1,18 @@
 import Dropdown from "./Dropdown";
-import firebase from "firebase/compat/app";
-import "firebase/compat/firestore";
-import "firebase/compat/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { useContext } from "react";
+import { AuthContext } from "./App";
+import Toogle from "./animation/Toogle";
 
-function Header() {
-  const auth = firebase.auth();
-  const [user] = useAuthState(auth)
+function Header({ setIsDarkTheme }) {
+  const { auth, user } = useContext(AuthContext);
 
   return (
-    <header className="bg-gray-50 dark:bg-slate-900 sticky shadow-sm dark:shadow-slate-800 z-50">
+    <header className="sticky z-50 bg-gray-50 shadow-sm dark:bg-slate-900 dark:shadow-slate-800">
       <div className="flex sm:grid sm:grid-cols-4">
-        <div className="sm:col-span-2 my-auto sm:ml-2 flex text-blue-500 dark:text-indigo-600">
+        <div className="my-auto flex text-blue-500 dark:text-indigo-600 sm:col-span-2 sm:ml-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-16 h-16"
+            className="h-16 w-16"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -26,16 +24,18 @@ function Header() {
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="my-auto ml-2 hidden sm:flex font-semibold text-md sm:text-2xl text-blue-600 dark:text-gray-300">
+          <h3 className="text-md my-auto ml-2 hidden font-semibold text-blue-600 dark:text-gray-300 sm:flex sm:text-2xl">
             Welcome to The Round Table!!!
           </h3>
         </div>
-        <div className="sm:col-span-2 ml-auto flex justify-end">
-          
+        <div className="ml-auto flex justify-end sm:col-span-2">
           <div className="my-auto sm:mr-5">
             <ul className="col-span-1 flex space-x-5 text-xl font-semibold text-blue-600 dark:text-gray-300">
-              <li className="duration-100 hover:text-blue-500 dark:hover:text-indigo-500 hover:scale-105">
-                <a href="#" className="flex group">
+              <li>
+                <Toogle setIsDarkTheme={setIsDarkTheme} />
+              </li>
+              <li className="duration-100 hover:scale-105 hover:text-blue-500 dark:hover:text-indigo-500">
+                <a href="#" className="group flex">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6 group-hover:-rotate-6"
@@ -53,8 +53,8 @@ function Header() {
                   Chat
                 </a>
               </li>
-              <li className="duration-100 hover:text-blue-500 dark:hover:text-indigo-500 hover:scale-105">
-                <a href="#" className="flex group">
+              <li className="duration-100 hover:scale-105 hover:text-blue-500 dark:hover:text-indigo-500">
+                <a href="#" className="group flex">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6  group-hover:-rotate-6"
@@ -78,9 +78,9 @@ function Header() {
             <Dropdown
               host={function () {
                 return (
-                  <a className="block ml-5 sm:ml-0 p-1 rounded-full bg-blue-600 dark:bg-indigo-700 transition hover:scale-110 hover:bg-blue-400 dark:hover:bg-indigo-500">
+                  <a className="ml-5 block rounded-full bg-blue-600 p-1 transition hover:scale-110 hover:bg-blue-400 dark:bg-indigo-700 dark:hover:bg-indigo-500 sm:ml-0">
                     <img
-                      className="max-w-full max-h-12 rounded-full cursor-pointer object-cover"
+                      className="max-h-12 max-w-full cursor-pointer rounded-full object-cover"
                       src={user && user.photoURL}
                       alt=""
                     />
@@ -133,7 +133,7 @@ function Header() {
                   <div className="flex space-x-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 my-auto"
+                      className="my-auto h-6 w-6"
                       viewBox="0 0 16 16"
                       fill="currentColor"
                     >
