@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { AuthContext } from "./App";
 import Toogle from "./animation/Toogle";
 
-function Header({ setIsDarkTheme }) {
+function Header({ setTheme }) {
   const { auth, user } = useContext(AuthContext);
 
   return (
@@ -32,7 +32,7 @@ function Header({ setIsDarkTheme }) {
           <div className="my-auto sm:mr-5">
             <ul className="col-span-1 flex space-x-5 text-xl font-semibold text-blue-600 dark:text-gray-300">
               <li>
-                <Toogle setIsDarkTheme={setIsDarkTheme} />
+                <Toogle setTheme={setTheme} />
               </li>
               <li className="duration-100 hover:scale-105 hover:text-blue-500 dark:hover:text-indigo-500">
                 <a href="#" className="group flex">

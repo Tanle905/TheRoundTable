@@ -9,7 +9,7 @@ import {
   useDocumentData,
 } from "react-firebase-hooks/firestore";
 import Loading from "./animation/Loading";
-import React from "react";
+import React, { useEffect } from "react";
 import SignIn from "./auth/SignIn";
 import { useState } from "react";
 
@@ -26,11 +26,12 @@ const firebaseApp = firebase.initializeApp({
 const AuthContext = React.createContext();
 
 const App = () => {
+  const isSystemDarkTheme =
+  window.matchMedia &&
+  window.matchMedia("(prefers-color-scheme: dark)").matches;
   const auth = firebase.auth();
   const [user, authLoading] = useAuthState(auth);
-  const [isDarkTheme, setIsDarkTheme] = useState(
-    localStorage.getItem("isDarkTheme")
-  );
+  const [theme, setTheme] = useState(localStorage.getItem("theme"));
   const userRef = firebase.firestore().collection("users");
   const userDocRef =
     user && firebase.firestore().collection("users").doc(user.uid);
@@ -38,6 +39,19 @@ const App = () => {
   const [userDocumentData, userDocumentDataIsLoading] =
     useDocumentData(userDocRef);
   let content;
+
+  useEffect(() => {
+    if (!localStorage.getItem("theme")) {
+      localStorage.setItem(
+        "theme",
+        JSON.stringify({
+          isDarkTheme: isSystemDarkTheme,
+          isUsingSystemTheme: true,
+        })
+      );
+      setTheme({ isDarkTheme: isSystemDarkTheme, isUsingSystemTheme: true });
+    }
+  }, []);
 
   function addUser() {
     if (!authLoading) {
@@ -68,7 +82,7 @@ const App = () => {
       content = (
         <div className="h-screen overflow-hidden">
           <AuthContext.Provider value={{ auth, user }}>
-            <Header setIsDarkTheme={setIsDarkTheme} />
+            <Header setTheme={setTheme} />
             <Message />
           </AuthContext.Provider>
         </div>
@@ -81,7 +95,7 @@ const App = () => {
   }
   return (
     <AuthContext.Provider value={{ auth, user }}>
-      <div className={isDarkTheme ? "dark" : "light"}>{content}</div>
+      <div className={theme?.isDarkTheme ? "dark" : "light"}>{content}</div>
     </AuthContext.Provider>
   );
 };

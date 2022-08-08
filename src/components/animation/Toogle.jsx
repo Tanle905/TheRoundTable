@@ -3,23 +3,33 @@ import { Switch } from "@headlessui/react";
 import { useEffect } from "react";
 import { Typography } from "antd";
 
-export default function Toggle({ setIsDarkTheme }) {
-  const [enabled, setEnabled] = useState(false);
-  const [isAuto, setIsAuto] = useState(
-    JSON.parse(localStorage.getItem("autoTheme"))
-  );
+export default function Toggle({ setTheme }) {
+  const theme =
+    localStorage.getItem("theme") && JSON.parse(localStorage.getItem("theme"));
+  const isSystemDarkTheme =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const [enabled, setEnabled] = useState(theme?.isDarkTheme);
+  const [isAuto, setIsAuto] = useState(theme?.isUsingSystemTheme);
 
   useEffect(() => {
-    localStorage.setItem("isDarkTheme", enabled);
-    setIsDarkTheme(enabled);
+    if (localStorage.getItem("theme")) {
+      const newTheme = {
+        ...JSON.parse(localStorage.getItem("theme")),
+        isDarkTheme: enabled,
+      };
+      localStorage.setItem("theme", JSON.stringify(newTheme));
+      setTheme(newTheme);
+    }
   }, [enabled]);
 
   function systemThemeHandle() {
+    const newTheme = {
+      ...JSON.parse(localStorage.getItem("theme")),
+      isUsingSystemTheme: !isAuto,
+    };
     setIsAuto(!isAuto);
-    localStorage.setItem("autoTheme", !isAuto);
-    const isSystemDarkTheme =
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    localStorage.setItem("theme", JSON.stringify(newTheme));
     setEnabled(isSystemDarkTheme);
   }
 
