@@ -95,7 +95,7 @@ const App = () => {
   }
   return (
     <AuthContext.Provider value={{ auth, user }}>
-      <div className={theme?.isDarkTheme ? "dark" : "light"}>{content}</div>
+      <div className={`${theme?.isDarkTheme ? "dark" : "light"}`}>{content}</div>
     </AuthContext.Provider>
   );
 };

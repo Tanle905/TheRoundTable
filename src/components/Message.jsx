@@ -107,7 +107,7 @@ const Message = React.memo(() => {
   //fileHandle section
   /*END OF Component Section*/
   return (
-    <section className="grid grid-cols-12 bg-gray-50 dark:bg-slate-900">
+    <section className="grid grid-cols-12 bg-gray-50 dark:bg-slate-900 transition-all duration-100">
       <div className="col-span-3 hidden shadow-md shadow-gray-500 dark:shadow-slate-800 xl:block">
         <Friends
           auth={auth}
@@ -400,7 +400,7 @@ const Message = React.memo(() => {
           </div>
         </div>
         {userFriendsCollectionData && userFriendsCollectionData.length !== 0 && (
-          <div className=" fixed bottom-0 row-start-6 mx-1 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%]">
+          <div className=" fixed bottom-0 row-start-6 mx-1 w-[100%] bg-gray-50 p-5 dark:bg-slate-900 lg:w-[75%] xl:w-[58%] transition-all duration-100">
             <form
               onSubmit={(e) =>
                 sendMessage(
